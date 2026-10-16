@@ -232,13 +232,14 @@ const save=()=>localStorage.setItem('tienda_cfg',JSON.stringify({...cfg,token:''
 function toast(t){const e=$('#toast');e.textContent=t;e.style.display='block';setTimeout(()=>e.style.display='none',2800)}
 
 async function load(){
-  try{const r=await fetch(cfg.path+'?t='+Date.now());const j=await r.json();apps=j.apps||[];admins=j.admins||[];vault=j.vault||{tk:{}}}catch(e){apps=[]}
+  baseSig='none';try{const r=await fetch(cfg.path+'?t='+Date.now(),{cache:'no-store'});const t=await r.text();baseSig=sigOf(t);const j=JSON.parse(t);apps=j.apps||[];admins=j.admins||[];vault=j.vault||{tk:{}}}catch(e){apps=[]}
+  if(localStorage.getItem('tienda_base')!=baseSig)['tienda_draft','tienda_admins','tienda_vault'].forEach(k=>localStorage.removeItem(k));
   try{const x=JSON.parse(localStorage.getItem('tienda_admins'));if(x)admins=x}catch(e){}try{const v=JSON.parse(localStorage.getItem('tienda_vault'));if(v)vault=v}catch(e){}vault.tk=vault.tk||{};if(vault.repo){cfg.repo=vault.repo;cfg.branch=vault.branch||'main'}
   const d=localStorage.getItem('tienda_draft');if(d){try{apps=JSON.parse(d)}catch(e){}}
   if(!apps.length)apps=[{id:'demo',name:'App de ejemplo',url:'#',cat:'Ejemplos',icon:'',desc:'Añade tus apps desde Administración.',text:'Esta es una ficha de ejemplo.',color:0,desk:true,mob:true,imgD:[],imgM:[]}];
   render();
 }
-const draft=()=>localStorage.setItem('tienda_draft',JSON.stringify(apps));
+const draft=()=>{localStorage.setItem('tienda_draft',JSON.stringify(apps));localStorage.setItem('tienda_base',baseSig)};
 
 function iconHtml(a){const i=a.icon||'';return /^(data:|https?:|img\/)/.test(i)?`<div class="ic"><img src="${esc(U(i))}"></div>`:`<div class="ic" style="background:linear-gradient(135deg,${GRADS[(a.color||0)%GRADS.length]});color:#fff">${esc(i||(a.name||'?')[0].toUpperCase())}</div>`}
 function render(){
@@ -326,11 +327,12 @@ async function publish(){
     const body={message:'Actualizar tienda',branch:cfg.branch,content:btoa(unescape(encodeURIComponent(JSON.stringify({apps,admins,vault})))),sha};
     const p=await fetch(u,{method:'PUT',headers:h,body:JSON.stringify(body)});
     if(!p.ok)throw new Error((await p.json()).message);
-    localStorage.removeItem('tienda_draft');localStorage.removeItem('tienda_admins');localStorage.removeItem('tienda_vault');const n=await gc();toast('Publicado en la nube'+(n?' · '+n+' imagen(es) eliminadas de GitHub':''));
+    localStorage.removeItem('tienda_draft');localStorage.removeItem('tienda_admins');localStorage.removeItem('tienda_vault');localStorage.removeItem('tienda_base');const n=await gc();toast('Publicado en la nube'+(n?' · '+n+' imagen(es) eliminadas de GitHub':''));
   }catch(e){toast('Error: '+e.message)}
 }
 let vault={tk:{}},sess={};
-const svV=()=>localStorage.setItem('tienda_vault',JSON.stringify(vault));
+const svV=()=>{localStorage.setItem('tienda_vault',JSON.stringify(vault));localStorage.setItem('tienda_base',baseSig)};
+let baseSig='none';const sigOf=t=>{let h=0;for(let i=0;i<t.length;i++)h=(h*31+t.charCodeAt(i))|0;return t.length+':'+h};
 const b64=u=>btoa(String.fromCharCode(...u)),ub=t=>Uint8Array.from(atob(t),c=>c.charCodeAt(0));
 async function dkey(pw,salt){const m=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:200000,hash:'SHA-256'},m,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])}
 async function enc(t,pw){const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12));const ct=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},await dkey(pw,salt),new TextEncoder().encode(t)));return{s:b64(salt),iv:b64(iv),ct:b64(ct)}}
@@ -429,6 +431,15 @@ function admUsers(){
   $('#adm').querySelectorAll('[data-dadm]').forEach(b=>b.onclick=()=>{if(confirm('¿Eliminar administrador?')){delete vault.tk[admins[b.dataset.dadm].u];admins.splice(b.dataset.dadm,1);sv();admUsers()}});
 }
 function openAdmin(){sess.pw?(ed=null,tab='a',admRender()):loginRender();$('#ovA').classList.add('on')}
+async function refresh(){
+  if(sess.pw||localStorage.getItem('tienda_draft')||$('#ovA').classList.contains('on'))return;
+  try{const r=await fetch(cfg.path+'?t='+Date.now(),{cache:'no-store'});const t=await r.text(),g=sigOf(t);if(g==baseSig)return;
+    baseSig=g;const j=JSON.parse(t);apps=j.apps||[];admins=j.admins||[];vault=j.vault||{tk:{}};vault.tk=vault.tk||{};render()}catch(e){}
+}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});
+addEventListener('pageshow',e=>{if(e.persisted)refresh()});
+addEventListener('focus',refresh);
+setInterval(refresh,60000);
 load();
 </script>
 </body>
