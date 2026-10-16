@@ -3,7 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Mi Tienda de Apps</title>
+<title>Store Studio</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" id="tc" content="#ffffff">
+<meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Store Studio">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#fff;--card:#fff;--tx:#1f1f1f;--mut:#5f6368;--bd:#e0e3e7;--sf:#f1f3f4;--a1:#01875f;--a2:#4285f4;--a3:#fbbc04;--onp:#fff;--sh:0 1px 4px #0003}
@@ -236,12 +241,17 @@ input:focus,textarea:focus,select:focus{outline:2px solid color-mix(in srgb,var(
 .ic.tr img{object-fit:contain;filter:drop-shadow(0 6px 10px #0004)}
 #adm:not(:has(#lu)){height:min(780px,94vh)}
 @media(max-width:700px){#adm:not(:has(#lu)){height:100%}}
+.lg{width:38px;height:38px;object-fit:contain;flex:none}
+.logo{gap:10px}.logo .sl{color:var(--c);font-weight:800}
+.logo>span{font-weight:800;letter-spacing:-.02em}
+.ib[hidden]{display:none}
 </style>
 </head>
 <body data-theme="light">
 <header>
-  <div class="logo"><i>▶</i>Mi Tienda</div>
+  <div class="logo"><img class="lg" src="icon-192.png" alt=""><span>Store <span class="sl" style="--c:#ef4444">S</span><span class="sl" style="--c:#f97316">t</span><span class="sl" style="--c:#eab308">u</span><span class="sl" style="--c:#22c55e">d</span><span class="sl" style="--c:#06b6d4">i</span><span class="sl" style="--c:#a855f7">o</span></span></div>
   <div class="hi">
+    <button class="ib" id="bI" title="Instalar aplicación" hidden><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0-4-4m4 4 4-4M5 19h14"/></svg></button>
     <button class="ib" id="bS" title="Buscar"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
     <button class="ib" id="bV" title="Vista"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/></svg></button>
     <button class="ib" id="bT" title="Tema"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg></button>
@@ -477,7 +487,7 @@ const devIc=a=>`<span class="dv"><span class="${a.mob!==false?'':'off'}" title="
 const THEMES=[['light','Claro','#ffffff'],['dark','Oscuro','#131314'],['medio','Medio','#3b4260'],['crema','Crema','#fbf3e4'],['loto','Loto','#fdeef6']];
 let admins=[],tab='a';
 const MAIN={u:'xavibc',s:'tienda-xavibc',h:'1b6bf2a2c37ed4db7960a8af1c0c1d69b22dc76af4a2549d4b2ba8d81fdaf8c8'};
-const setTheme=t=>{document.body.dataset.theme=t;localStorage.setItem('tienda_theme',t)};
+const setTheme=t=>{document.body.dataset.theme=t;localStorage.setItem('tienda_theme',t);const m=document.getElementById('tc');if(m)m.content=({light:'#ffffff',dark:'#131314',medio:'#3b4260',crema:'#fbf3e4',loto:'#fdeef6'})[t]||'#ffffff'};
 setTheme(localStorage.getItem('tienda_theme')||'light');
 const hash=async(p,s)=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s+':'+p)))].map(b=>b.toString(16).padStart(2,'0')).join('');
 function pop(id){$('#sb').classList.remove('on');const p=$(id),o=p.classList.contains('on');closePops();if(!o)p.classList.add('on')}
@@ -528,6 +538,11 @@ function admUsers(){
   $('#adm').querySelectorAll('[data-dadm]').forEach(b=>b.onclick=()=>{if(confirm('¿Eliminar administrador?')){delete vault.tk[admins[b.dataset.dadm].u];admins.splice(b.dataset.dadm,1);sv();admUsers()}});
 }
 function openAdmin(){sess.pw?(ed=null,tab='a',admRender()):loginRender();$('#ovA').classList.add('on')}
+let dip=null;
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();dip=e;$('#bI').hidden=false});
+$('#bI').onclick=async()=>{if(!dip)return;dip.prompt();await dip.userChoice;dip=null;$('#bI').hidden=true};
+addEventListener('appinstalled',()=>{$('#bI').hidden=true});
+if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 async function refresh(){
   if(sess.pw||localStorage.getItem('tienda_draft')||$('#ovA').classList.contains('on'))return;
   try{const r=await fetch(cfg.path+'?t='+Date.now(),{cache:'no-store'});const t=await r.text(),g=sigOf(t);if(g==baseSig)return;
