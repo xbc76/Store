@@ -232,6 +232,10 @@ input:focus,textarea:focus,select:focus{outline:2px solid color-mix(in srgb,var(
 .txt{white-space:normal;color:var(--tx)}
 #ipv .ic{width:56px;height:56px}
 @media(min-width:900px){.gal.d img{width:440px;max-width:none}.gal.m img{width:180px}.gal{gap:16px}}
+.ic.tr{background:transparent;box-shadow:none;border-radius:0;overflow:visible}
+.ic.tr img{object-fit:contain;filter:drop-shadow(0 6px 10px #0004)}
+#adm:not(:has(#lu)){height:min(780px,94vh)}
+@media(max-width:700px){#adm:not(:has(#lu)){height:100%}}
 </style>
 </head>
 <body data-theme="light">
@@ -273,7 +277,7 @@ async function load(){
 }
 const draft=()=>{localStorage.setItem('tienda_draft',JSON.stringify(apps));localStorage.setItem('tienda_base',baseSig)};
 
-function iconHtml(a){const i=a.icon||'';return /^(data:|https?:|img\/)/.test(i)?`<div class="ic"><img src="${esc(U(i))}"></div>`:`<div class="ic" style="background:linear-gradient(135deg,${GRADS[(a.color||0)%GRADS.length]});color:#fff">${esc(i||(a.name||'?')[0].toUpperCase())}</div>`}
+function iconHtml(a){const i=a.icon||'';return /^(data:|https?:|img\/)/.test(i)?`<div class="ic${/\.(png|webp)$|^data:image\/(png|webp)/.test(i)?' tr':''}"><img src="${esc(U(i))}"></div>`:`<div class="ic" style="background:linear-gradient(135deg,${GRADS[(a.color||0)%GRADS.length]});color:#fff">${esc(i||(a.name||'?')[0].toUpperCase())}</div>`}
 function render(){
     const cats=['Todas',...new Set(apps.map(a=>a.cat).filter(Boolean))];
   if(!cats.includes(cat))cat='Todas';
@@ -291,13 +295,13 @@ $('#q').oninput=render;
 let dev='d';
 function openDet(id){
   const a=apps.find(x=>x.id==id);if(!a)return;
-  const hd=a.desk!==false&&(a.imgD||[]).length>0,hm=a.mob!==false&&(a.imgM||[]).length>0;dev=hd?'d':hm?'m':(a.desk!==false?'d':'m');
+  const hd=a.desk!==false&&(a.imgD||[]).length>0,hm=a.mob!==false&&(a.imgM||[]).length>0;dev=hm?'m':hd?'d':(a.mob!==false?'m':'d');
   const draw=()=>{
     const imgs=(dev=='d'?a.imgD:a.imgM)||[];
     $('#det').innerHTML=`<button class="btn x" data-close>✕</button>
     <div class="hd">${iconHtml(a)}<div><h2>${esc(a.name)}</h2>${a.cat?`<div class="tag" style="font-size:15px">${esc(a.cat)}</div>`:''}<div class="sub">${devIc(a)}</div></div></div>
     ${a.url&&a.url!='#'?`<a class="btn p go" href="${esc(a.url)}" target="_blank" rel="noopener">▶ Abrir aplicación</a>`:''}
-    ${hd&&hm?'<div class="seg">':'<div hidden>'}${a.desk!==false?`<button class="tab ${dev=='d'?'on':''}" data-dev="d" title="Ordenador" aria-label="Ordenador">${I.d}</button>`:''}${a.mob!==false?`<button class="tab ${dev=='m'?'on':''}" data-dev="m" title="Móvil" aria-label="Móvil">${I.m}</button>`:''}</div>
+    ${hd&&hm?'<div class="seg">':'<div hidden>'}${a.mob!==false?`<button class="tab ${dev=='m'?'on':''}" data-dev="m" title="Móvil" aria-label="Móvil">${I.m}</button>`:''}${a.desk!==false?`<button class="tab ${dev=='d'?'on':''}" data-dev="d" title="Ordenador" aria-label="Ordenador">${I.d}</button>`:''}</div>
     <div class="gal ${dev}">${imgs.length?imgs.map(i=>`<img src="${U(i)}" loading="lazy">`).join(''):'<div class="empty">Sin imágenes para esta versión</div>'}</div>
     <h3 style="margin-top:18px;font-weight:500">Acerca de esta app →</h3><p style="margin-top:6px">${esc(a.desc)}</p><div class="txt rt">${textHtml(a.text)}</div>`;
     $('#det').querySelectorAll('[data-dev]').forEach(b=>b.onclick=()=>{dev=b.dataset.dev;draw()});
@@ -308,7 +312,14 @@ $('#grid').onclick=e=>{const c=e.target.closest('.card');if(c)openDet(c.dataset.
 document.addEventListener('click',e=>{if(e.target.closest('[data-close]')||e.target.classList.contains('ov'))document.querySelectorAll('.ov').forEach(o=>o.classList.remove('on'))});
 
 /* Administración */
-function compress(file,max){return new Promise(res=>{const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const k=Math.min(1,max/im.width),c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',.78))};im.src=r.result};r.readAsDataURL(file)})}
+function compress(file,max,icon){return new Promise(res=>{const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{
+  const k=Math.min(1,max/(icon?Math.max(im.width,im.height):im.width)),c=document.createElement('canvas');
+  c.width=Math.max(1,Math.round(im.width*k));c.height=Math.max(1,Math.round(im.height*k));
+  const x=c.getContext('2d');x.drawImage(im,0,0,c.width,c.height);let out;
+  if(icon){let a=false;const d=x.getImageData(0,0,c.width,c.height).data;for(let i=3;i<d.length;i+=4)if(d[i]<250){a=true;break}
+    if(a){out=c.toDataURL('image/webp',.9);if(!out.startsWith('data:image/webp'))out=c.toDataURL('image/png')}else out=c.toDataURL('image/jpeg',.85)}
+  else out=c.toDataURL('image/jpeg',.78);
+  res(out)};im.src=r.result};r.readAsDataURL(file)})}
 function thumbs(k){return ed[k].map((s,i)=>`<div><img src="${U(s)}"><b data-rm="${k}:${i}">×</b></div>`).join('')}
 function admApps(){
   const e=ed;
@@ -329,9 +340,9 @@ function admApps(){
    <div><label>Descripción corta</label><input id="fd" value="${esc(e.desc)}"></div>
    <div><label>Texto completo</label><div class="rte">${rteBar()}<div class="edt rt" id="ft" contenteditable="true">${textHtml(e.text)}</div></div></div>
    <div><label>Color de portada</label><select id="fcol">${GRADS.map((g,i)=>`<option value="${i}" ${e.color==i?'selected':''}>Degradado ${i+1}</option>`).join('')}</select></div>
-   <div class="row"><label><input type="checkbox" id="fdk" ${e.desk!==false?'checked':''} style="width:auto"> ${I.d} Versión ordenador</label><label><input type="checkbox" id="fmb" ${e.mob!==false?'checked':''} style="width:auto"> ${I.m} Versión móvil</label></div>
-   <div><label>${I.d} Imágenes ordenador</label><input type="file" id="fid" accept="image/*" multiple><div class="th" style="margin-top:6px">${thumbs('imgD')}</div></div>
+   <div class="row"><label><input type="checkbox" id="fmb" ${e.mob!==false?'checked':''} style="width:auto"> ${I.m} Versión móvil</label><label><input type="checkbox" id="fdk" ${e.desk!==false?'checked':''} style="width:auto"> ${I.d} Versión ordenador</label></div>
    <div><label>${I.m} Imágenes móvil</label><input type="file" id="fim" accept="image/*" multiple><div class="th" style="margin-top:6px">${thumbs('imgM')}</div></div>
+   <div><label>${I.d} Imágenes ordenador</label><input type="file" id="fid" accept="image/*" multiple><div class="th" style="margin-top:6px">${thumbs('imgD')}</div></div>
    <div class="row"><button class="btn p" id="sv">Guardar ficha</button><button class="btn" id="cn">Cancelar</button></div></div>`:`
   <div class="row" style="margin-top:12px"><button class="btn p" id="nw">Nueva aplicación</button><button class="btn ok" id="pub">Publicar en GitHub</button><button class="btn" id="lo">Salir</button></div>
   <div style="margin:10px 0">${apps.map((a,i)=>`<div class="al">${iconHtml(a)}<span><b>${esc(a.name)}</b><br><small>${esc(a.cat)}</small></span><div class="acts"><button class="btn" data-up="${i}">↑</button><button class="btn ed" data-ed="${i}">Editar</button><button class="btn d" data-del="${i}">Borrar</button></div></div>`).join('')}</div>`);
@@ -346,7 +357,7 @@ function admApps(){
   const up=(s,k,max)=>{const x=A.querySelector(s);if(x)x.onchange=async()=>{for(const f of x.files){toast('Subiendo imagen…');ed[k].push(await store(await compress(f,max),ed.id))};keep();admRender()}};
   const keep=()=>{Object.assign(ed,{name:$('#fn').value,cat:$('#fc').value,url:$('#fu').value,desc:$('#fd').value,text:clean($('#ft').innerHTML),color:+$('#fcol').value,desk:$('#fdk').checked,mob:$('#fmb').checked});if($('#fi').value.trim())ed.icon=$('#fi').value.trim()};
   up('#fid','imgD',1000);up('#fim','imgM',600);
-  const fi=A.querySelector('#fif');if(fi)fi.onchange=async()=>{keep();ed.icon=await store(await compress(fi.files[0],128),ed.id);admRender();toast('Icono subido')};
+  const fi=A.querySelector('#fif');if(fi)fi.onchange=async()=>{keep();ed.icon=await store(await compress(fi.files[0],128,true),ed.id);admRender();toast('Icono subido')};
   const fie=$('#fi');if(fie)fie.oninput=()=>{ed.icon=fie.value.trim();$('#ipv').innerHTML=iconHtml({...ed,name:$('#fn').value})};
   on('#irm',()=>{keep();ed.icon='';admRender()});
   const ft=$('#ft');if(ft){
@@ -434,7 +445,7 @@ const cache={},U=x=>cache[x]||x,ghOK=()=>cfg.repo&&cfg.token;
 const ghU=p=>`https://api.github.com/repos/${cfg.repo}/contents/${p}`,ghH=()=>({Authorization:'Bearer '+cfg.token,Accept:'application/vnd.github+json'});
 async function store(d,id){
   if(!ghOK())return d;
-  const path=`img/${id}/${Date.now().toString(36)}${Math.random().toString(36).slice(2,6)}.jpg`;
+  const ext=d.startsWith('data:image/png')?'png':d.startsWith('data:image/webp')?'webp':'jpg',path=`img/${id}/${Date.now().toString(36)}${Math.random().toString(36).slice(2,6)}.${ext}`;
   try{const r=await fetch(ghU(path),{method:'PUT',headers:ghH(),body:JSON.stringify({message:'Subir imagen',branch:cfg.branch,content:d.split(',')[1]})});
     if(!r.ok)throw new Error((await r.json()).message);cache[path]=d;return path}
   catch(e){toast('No se pudo subir a GitHub: '+e.message);return d}
@@ -462,7 +473,7 @@ async function gc(){
   return n;
 }
 const I={d:`<svg class="sv" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>`,m:`<svg class="sv" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="3" width="10" height="18" rx="2.5"/><path d="M11 18h2"/></svg>`};
-const devIc=a=>`<span class="dv"><span class="${a.desk!==false?'':'off'}" title="${a.desk!==false?'Ordenador':'Ordenador: no disponible'}">${I.d}</span><span class="${a.mob!==false?'':'off'}" title="${a.mob!==false?'Móvil':'Móvil: no disponible'}">${I.m}</span></span>`;
+const devIc=a=>`<span class="dv"><span class="${a.mob!==false?'':'off'}" title="${a.mob!==false?'Móvil':'Móvil: no disponible'}">${I.m}</span><span class="${a.desk!==false?'':'off'}" title="${a.desk!==false?'Ordenador':'Ordenador: no disponible'}">${I.d}</span></span>`;
 const THEMES=[['light','Claro','#ffffff'],['dark','Oscuro','#131314'],['medio','Medio','#3b4260'],['crema','Crema','#fbf3e4'],['loto','Loto','#fdeef6']];
 let admins=[],tab='a';
 const MAIN={u:'xavibc',s:'tienda-xavibc',h:'1b6bf2a2c37ed4db7960a8af1c0c1d69b22dc76af4a2549d4b2ba8d81fdaf8c8'};
