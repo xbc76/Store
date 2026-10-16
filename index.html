@@ -196,6 +196,11 @@ input:focus,textarea:focus,select:focus{outline:2px solid color-mix(in srgb,var(
 .gal img{object-fit:contain;object-position:center;background:var(--sf)}
 .gal.d img{aspect-ratio:16/9}
 .gal.m img{aspect-ratio:9/20}
+
+/* ===== Buscador en globo flotante ===== */
+.sb{position:fixed;top:62px;right:12px;left:auto;margin:0;max-width:none;order:0;flex-basis:auto;width:min(380px,calc(100vw - 24px));padding:10px;border-radius:24px;background:color-mix(in srgb,var(--card) 88%,transparent);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid var(--bd);box-shadow:0 24px 60px -12px #0006;z-index:40;animation:pp .2s}
+.sb input{background:var(--sf);border:0;box-shadow:none;padding:12px 18px 12px 46px;animation:none}
+.sb span{left:28px;top:21px;color:var(--mut)}
 </style>
 </head>
 <body data-theme="light">
@@ -209,7 +214,6 @@ input:focus,textarea:focus,select:focus{outline:2px solid color-mix(in srgb,var(
   <div class="sb" id="sb"><span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span><input id="q" type="search" placeholder="Buscar aplicaciones"></div>
 </header>
 <div class="pop" id="pV"></div><div class="pop" id="pG"></div>
-<section class="hero"><h1>Mi colección de apps</h1><p id="cnt"></p></section>
 <div class="chips" id="chips"></div>
 <main><div id="grid" class="v-big"></div></main>
 
@@ -222,30 +226,29 @@ const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const VIEWS=[['big','Cuadrícula grande'],['small','Cuadrícula pequeña'],['list','Lista'],['compact','Compacta'],['icons','Iconos'],['mosaic','Mosaico']];
 const GRADS=['#6c5ce7,#ff6b9d','#00c2ff,#6c5ce7','#ff9f43,#ff6b9d','#10b981,#00c2ff','#f43f5e,#f59e0b','#8b5cf6,#22d3ee'];
-let apps=[],cfg=JSON.parse(localStorage.getItem('tienda_cfg')||'{"repo":"","branch":"main","path":"apps.json","token":""}');
+let apps=[],cfg=JSON.parse(localStorage.getItem('tienda_cfg')||'{"repo":"","branch":"main","path":"apps.json","token":""}');cfg.token='';
 let cat='Todas',view=localStorage.getItem('tienda_view')||'big',ed=null;
-const save=()=>localStorage.setItem('tienda_cfg',JSON.stringify(cfg));
+const save=()=>localStorage.setItem('tienda_cfg',JSON.stringify({...cfg,token:''}));
 function toast(t){const e=$('#toast');e.textContent=t;e.style.display='block';setTimeout(()=>e.style.display='none',2800)}
 
 async function load(){
-  try{const r=await fetch(cfg.path+'?t='+Date.now());const j=await r.json();apps=j.apps||[];admins=j.admins||[]}catch(e){apps=[]}
-  if(cfg.token)try{const x=JSON.parse(localStorage.getItem('tienda_admins'));if(x)admins=x}catch(e){}
-  const d=localStorage.getItem('tienda_draft');if(d&&cfg.token){try{apps=JSON.parse(d)}catch(e){}}
+  try{const r=await fetch(cfg.path+'?t='+Date.now());const j=await r.json();apps=j.apps||[];admins=j.admins||[];vault=j.vault||{tk:{}}}catch(e){apps=[]}
+  try{const x=JSON.parse(localStorage.getItem('tienda_admins'));if(x)admins=x}catch(e){}try{const v=JSON.parse(localStorage.getItem('tienda_vault'));if(v)vault=v}catch(e){}vault.tk=vault.tk||{};if(vault.repo){cfg.repo=vault.repo;cfg.branch=vault.branch||'main'}
+  const d=localStorage.getItem('tienda_draft');if(d){try{apps=JSON.parse(d)}catch(e){}}
   if(!apps.length)apps=[{id:'demo',name:'App de ejemplo',url:'#',cat:'Ejemplos',icon:'',desc:'Añade tus apps desde Administración.',text:'Esta es una ficha de ejemplo.',color:0,desk:true,mob:true,imgD:[],imgM:[]}];
   render();
 }
 const draft=()=>localStorage.setItem('tienda_draft',JSON.stringify(apps));
 
-function iconHtml(a){const i=a.icon||'';return /^(data:|https?:)/.test(i)?`<div class="ic"><img src="${esc(i)}"></div>`:`<div class="ic" style="background:linear-gradient(135deg,${GRADS[(a.color||0)%GRADS.length]});color:#fff">${esc(i||(a.name||'?')[0].toUpperCase())}</div>`}
+function iconHtml(a){const i=a.icon||'';return /^(data:|https?:|img\/)/.test(i)?`<div class="ic"><img src="${esc(U(i))}"></div>`:`<div class="ic" style="background:linear-gradient(135deg,${GRADS[(a.color||0)%GRADS.length]});color:#fff">${esc(i||(a.name||'?')[0].toUpperCase())}</div>`}
 function render(){
     const cats=['Todas',...new Set(apps.map(a=>a.cat).filter(Boolean))];
   $('#chips').innerHTML=cats.map(c=>`<button class="chip ${c==cat?'on':''}" data-c="${esc(c)}">${esc(c)}</button>`).join('');
-  $('#cnt').textContent=apps.length+(apps.length==1?' aplicación':' aplicaciones')+' · '+(cats.length-1)+(cats.length==2?' categoría':' categorías');
   const q=$('#q').value.toLowerCase();
   const l=apps.filter(a=>(cat=='Todas'||a.cat==cat)&&(a.name+a.desc+a.cat).toLowerCase().includes(q));
   const g=$('#grid');g.className='v-'+view;
   g.innerHTML=l.length?l.map((a,n)=>{
-    const cover=(a.imgD&&a.imgD[0])||(a.imgM&&a.imgM[0]);const bg=cover?`url(${cover}) center/cover`:`linear-gradient(135deg,${GRADS[(a.color||0)%GRADS.length]})`;return `<article class="card" data-id="${esc(a.id)}" style="animation-delay:${Math.min(n,14)*35}ms"><div class="ban" style="background:${bg}"></div><div class="meta">${iconHtml(a)}<div class="inf"><h3>${esc(a.name)}</h3><div class="sub"><span class="tag">${esc(a.cat)}</span> ${devIc(a)}</div><p>${esc(a.desc)}</p></div></div></article>`}).join(''):'<div class="empty">No hay aplicaciones todavía </div>';
+    const cover=(a.imgD&&a.imgD[0])||(a.imgM&&a.imgM[0]);const bg=cover?`url(${U(cover)}) center/cover`:`linear-gradient(135deg,${GRADS[(a.color||0)%GRADS.length]})`;return `<article class="card" data-id="${esc(a.id)}" style="animation-delay:${Math.min(n,14)*35}ms"><div class="ban" style="background:${bg}"></div><div class="meta">${iconHtml(a)}<div class="inf"><h3>${esc(a.name)}</h3><div class="sub"><span class="tag">${esc(a.cat)}</span> ${devIc(a)}</div><p>${esc(a.desc)}</p></div></div></article>`}).join(''):'<div class="empty">No hay aplicaciones todavía </div>';
 }
 $('#chips').onclick=e=>{if(e.target.dataset.c){cat=e.target.dataset.c;render()}};
 $('#q').oninput=render;
@@ -261,7 +264,7 @@ function openDet(id){
     <div class="hd">${iconHtml(a)}<div><h2>${esc(a.name)}</h2><div class="tag" style="font-size:15px">${esc(a.cat)}</div><div class="sub">${devIc(a)}</div></div></div>
     ${a.url&&a.url!='#'?`<a class="btn p go" href="${esc(a.url)}" target="_blank" rel="noopener">▶ Abrir aplicación</a>`:''}
     ${hd&&hm?'<div class="seg">':'<div hidden>'}${a.desk!==false?`<button class="tab ${dev=='d'?'on':''}" data-dev="d" title="Ordenador" aria-label="Ordenador">${I.d}</button>`:''}${a.mob!==false?`<button class="tab ${dev=='m'?'on':''}" data-dev="m" title="Móvil" aria-label="Móvil">${I.m}</button>`:''}</div>
-    <div class="gal ${dev}">${imgs.length?imgs.map(i=>`<img src="${i}" loading="lazy">`).join(''):'<div class="empty">Sin imágenes para esta versión</div>'}</div>
+    <div class="gal ${dev}">${imgs.length?imgs.map(i=>`<img src="${U(i)}" loading="lazy">`).join(''):'<div class="empty">Sin imágenes para esta versión</div>'}</div>
     <h3 style="margin-top:18px;font-weight:500">Acerca de esta app →</h3><p style="margin-top:6px">${esc(a.desc)}</p><div class="txt">${esc(a.text)}</div>`;
     $('#det').querySelectorAll('[data-dev]').forEach(b=>b.onclick=()=>{dev=b.dataset.dev;draw()});
   };
@@ -272,14 +275,14 @@ document.addEventListener('click',e=>{if(e.target.closest('[data-close]')||e.tar
 
 /* Administración */
 function compress(file,max){return new Promise(res=>{const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const k=Math.min(1,max/im.width),c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',.78))};im.src=r.result};r.readAsDataURL(file)})}
-function thumbs(k){return ed[k].map((s,i)=>`<div><img src="${s}"><b data-rm="${k}:${i}">×</b></div>`).join('')}
+function thumbs(k){return ed[k].map((s,i)=>`<div><img src="${U(s)}"><b data-rm="${k}:${i}">×</b></div>`).join('')}
 function admApps(){
   const e=ed;
   $('#adm').innerHTML=`<button class="btn x" data-close>✕</button><h2>Administración</h2>${tabsHtml()}`+(e?`
   <div class="f" style="margin-top:12px">
    <div class="g2"><div><label>Nombre</label><input id="fn" value="${esc(e.name)}"></div><div><label>Categoría</label><input id="fc" value="${esc(e.cat)}"></div></div>
    <div><label>URL de la app (GitHub Pages)</label><input id="fu" value="${esc(e.url)}" placeholder="https://usuario.github.io/app/"></div>
-   <div class="g2"><div><label>Icono (emoji o URL)</label><input id="fi" value="${/^data:/.test(e.icon)?'':esc(e.icon)}" placeholder="🎮"></div><div><label>…o subir imagen de icono</label><input type="file" id="fif" accept="image/*"></div></div>
+   <div class="g2"><div><label>Icono (emoji o URL)</label><input id="fi" value="${/^(data:|img\/)/.test(e.icon)?'':esc(e.icon)}" placeholder="🎮"></div><div><label>…o subir imagen de icono</label><input type="file" id="fif" accept="image/*"></div></div>
    <div><label>Descripción corta</label><input id="fd" value="${esc(e.desc)}"></div>
    <div><label>Texto completo</label><textarea id="ft" rows="4">${esc(e.text)}</textarea></div>
    <div><label>Color de portada</label><select id="fcol">${GRADS.map((g,i)=>`<option value="${i}" ${e.color==i?'selected':''}>Degradado ${i+1}</option>`).join('')}</select></div>
@@ -292,7 +295,7 @@ function admApps(){
   <details><summary><b>Conexión con GitHub (nube)</b></summary><div class="f" style="margin-top:8px">
    <div class="g2"><div><label>Repositorio (usuario/repo)</label><input id="cr" value="${esc(cfg.repo)}"></div><div><label>Rama</label><input id="cb" value="${esc(cfg.branch)}"></div></div>
    <div class="g2"><div><label>Archivo de datos</label><input id="cp" value="${esc(cfg.path)}"></div><div><label>Token personal (permiso Contents: write)</label><input id="ct" type="password" value="${esc(cfg.token)}"></div></div>
-   <button class="btn" id="cs">Guardar conexión</button><small style="color:var(--mut)">El token se guarda solo en este navegador. Nunca lo subas al repositorio.</small></div></details>`);
+   <button class="btn" id="cs">Guardar conexión</button><small style="color:var(--mut)">El token se guarda cifrado con tu contraseña dentro de apps.json (hace falta contraseña de 10 o más caracteres) y se descifra al iniciar sesión en cualquier dispositivo. Publica para que quede en la nube.</small></div></details>`);
   const A=$('#adm'),on=(s,f)=>{const x=A.querySelector(s);if(x)x.onclick=f};
   on('#nw',()=>{ed={id:'a'+Date.now(),name:'',cat:'',url:'',icon:'',desc:'',text:'',color:0,desk:true,mob:true,imgD:[],imgM:[]};admRender()});
   on('#cn',()=>{ed=null;admRender()});
@@ -301,30 +304,72 @@ function admApps(){
     if($('#fi').value.trim())ed.icon=$('#fi').value.trim();
     const i=apps.findIndex(a=>a.id==ed.id);i<0?apps.push(ed):apps[i]=ed;
     apps=apps.filter(a=>a.id!='demo'||apps.length==1);draft();ed=null;admRender();render();toast('Guardado (pendiente de publicar)')});
-  const up=(s,k,max)=>{const x=A.querySelector(s);if(x)x.onchange=async()=>{for(const f of x.files)ed[k].push(await compress(f,max));keep();admRender()}};
+  const up=(s,k,max)=>{const x=A.querySelector(s);if(x)x.onchange=async()=>{for(const f of x.files){toast('Subiendo imagen…');ed[k].push(await store(await compress(f,max),ed.id))};keep();admRender()}};
   const keep=()=>{Object.assign(ed,{name:$('#fn').value,cat:$('#fc').value,url:$('#fu').value,desc:$('#fd').value,text:$('#ft').value,color:+$('#fcol').value,desk:$('#fdk').checked,mob:$('#fmb').checked});if($('#fi').value.trim())ed.icon=$('#fi').value.trim()};
   up('#fid','imgD',1000);up('#fim','imgM',600);
-  const fi=A.querySelector('#fif');if(fi)fi.onchange=async()=>{keep();ed.icon=await compress(fi.files[0],128);admRender()};
+  const fi=A.querySelector('#fif');if(fi)fi.onchange=async()=>{keep();ed.icon=await store(await compress(fi.files[0],128),ed.id);admRender()};
   A.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{keep();const[k,i]=b.dataset.rm.split(':');ed[k].splice(i,1);admRender()});
   A.querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>{ed=JSON.parse(JSON.stringify(apps[b.dataset.ed]));ed.imgD=ed.imgD||[];ed.imgM=ed.imgM||[];admRender()});
   A.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{if(confirm('¿Eliminar?')){apps.splice(b.dataset.del,1);draft();admRender();render()}});
   A.querySelectorAll('[data-up]').forEach(b=>b.onclick=()=>{const i=+b.dataset.up;if(i>0){[apps[i-1],apps[i]]=[apps[i],apps[i-1]];draft();admRender();render()}});
-  on('#exp',()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify({apps,admins},null,1)],{type:'application/json'}));a.download='apps.json';a.click()});
+  on('#exp',()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify({apps,admins,vault},null,1)],{type:'application/json'}));a.download='apps.json';a.click()});
   const im=A.querySelector('#imp');if(im)im.onchange=async()=>{try{apps=JSON.parse(await im.files[0].text()).apps;draft();admRender();render();toast('Importado')}catch(e){toast('JSON no válido')}};
-  on('#cs',()=>{cfg={repo:$('#cr').value.trim(),branch:$('#cb').value.trim()||'main',path:$('#cp').value.trim()||'apps.json',token:$('#ct').value.trim()};save();toast('Conexión guardada')});
-  on('#pub',publish);on('#lo',()=>{sessionStorage.removeItem('tienda_ok');$('#ovA').classList.remove('on')});
+  on('#cs',async()=>{cfg={repo:$('#cr').value.trim(),branch:$('#cb').value.trim()||'main',path:$('#cp').value.trim()||'apps.json',token:$('#ct').value.trim()};save();Object.assign(vault,{repo:cfg.repo,branch:cfg.branch,path:cfg.path});await seal(sess.u,sess.pw);svV();toast('Conexión guardada')});
+  on('#pub',publish);on('#lo',()=>{sessionStorage.removeItem('tienda_ok');sess={};cfg.token='';$('#ovA').classList.remove('on')});
 }
 async function publish(){
   if(!cfg.repo||!cfg.token)return toast('Configura repositorio y token');
   const u=`https://api.github.com/repos/${cfg.repo}/contents/${cfg.path}`,h={Authorization:'Bearer '+cfg.token,Accept:'application/vnd.github+json'};
   try{
-    toast('Publicando…');
+    toast('Publicando…');await migrate();
     let sha;const r=await fetch(u+'?ref='+cfg.branch,{headers:h});if(r.ok)sha=(await r.json()).sha;
-    const body={message:'Actualizar tienda',branch:cfg.branch,content:btoa(unescape(encodeURIComponent(JSON.stringify({apps,admins})))),sha};
+    const body={message:'Actualizar tienda',branch:cfg.branch,content:btoa(unescape(encodeURIComponent(JSON.stringify({apps,admins,vault})))),sha};
     const p=await fetch(u,{method:'PUT',headers:h,body:JSON.stringify(body)});
     if(!p.ok)throw new Error((await p.json()).message);
-    localStorage.removeItem('tienda_draft');localStorage.removeItem('tienda_admins');toast('Publicado en la nube');
+    localStorage.removeItem('tienda_draft');localStorage.removeItem('tienda_admins');localStorage.removeItem('tienda_vault');const n=await gc();toast('Publicado en la nube'+(n?' · '+n+' imagen(es) eliminadas de GitHub':''));
   }catch(e){toast('Error: '+e.message)}
+}
+let vault={tk:{}},sess={};
+const svV=()=>localStorage.setItem('tienda_vault',JSON.stringify(vault));
+const b64=u=>btoa(String.fromCharCode(...u)),ub=t=>Uint8Array.from(atob(t),c=>c.charCodeAt(0));
+async function dkey(pw,salt){const m=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:200000,hash:'SHA-256'},m,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])}
+async function enc(t,pw){const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12));const ct=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},await dkey(pw,salt),new TextEncoder().encode(t)));return{s:b64(salt),iv:b64(iv),ct:b64(ct)}}
+async function dec(o,pw){try{return new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:ub(o.iv)},await dkey(pw,ub(o.s)),ub(o.ct)))}catch(e){return null}}
+async function seal(u,pw){
+  if(!cfg.token||!u)return;
+  if(pw.length<10){toast('Contraseña corta: el token no se guarda en la nube (mínimo 10 caracteres)');return}
+  vault.tk[u]=await enc(cfg.token,pw);svV();
+}
+const cache={},U=x=>cache[x]||x,ghOK=()=>cfg.repo&&cfg.token;
+const ghU=p=>`https://api.github.com/repos/${cfg.repo}/contents/${p}`,ghH=()=>({Authorization:'Bearer '+cfg.token,Accept:'application/vnd.github+json'});
+async function store(d,id){
+  if(!ghOK())return d;
+  const path=`img/${id}/${Date.now().toString(36)}${Math.random().toString(36).slice(2,6)}.jpg`;
+  try{const r=await fetch(ghU(path),{method:'PUT',headers:ghH(),body:JSON.stringify({message:'Subir imagen',branch:cfg.branch,content:d.split(',')[1]})});
+    if(!r.ok)throw new Error((await r.json()).message);cache[path]=d;return path}
+  catch(e){toast('No se pudo subir a GitHub: '+e.message);return d}
+}
+async function migrate(){
+  for(const a of apps){
+    for(const k of ['imgD','imgM'])for(let i=0;i<(a[k]||[]).length;i++)if(a[k][i].startsWith('data:'))a[k][i]=await store(a[k][i],a.id);
+    if((a.icon||'').startsWith('data:'))a.icon=await store(a.icon,a.id);
+  }
+  draft();
+}
+async function gc(){
+  const used=new Set();apps.forEach(a=>[...(a.imgD||[]),...(a.imgM||[]),a.icon].forEach(x=>x&&used.add(x)));
+  let n=0;
+  try{
+    const r=await fetch(`https://api.github.com/repos/${cfg.repo}/git/trees/${cfg.branch}?recursive=1`,{headers:ghH()});
+    if(!r.ok)return 0;
+    for(const f of (await r.json()).tree||[]){
+      if(f.type=='blob'&&f.path.startsWith('img/')&&!used.has(f.path)){
+        const d=await fetch(ghU(f.path),{method:'DELETE',headers:ghH(),body:JSON.stringify({message:'Eliminar imagen',branch:cfg.branch,sha:f.sha})});
+        if(d.ok)n++;
+      }
+    }
+  }catch(e){}
+  return n;
 }
 const I={d:`<svg class="sv" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>`,m:`<svg class="sv" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="3" width="10" height="18" rx="2.5"/><path d="M11 18h2"/></svg>`};
 const devIc=a=>`<span class="dv"><span class="${a.desk!==false?'':'off'}" title="${a.desk!==false?'Ordenador':'Ordenador: no disponible'}">${I.d}</span><span class="${a.mob!==false?'':'off'}" title="${a.mob!==false?'Móvil':'Móvil: no disponible'}">${I.m}</span></span>`;
@@ -334,16 +379,16 @@ const MAIN={u:'xavibc',s:'tienda-xavibc',h:'1b6bf2a2c37ed4db7960a8af1c0c1d69b22d
 const setTheme=t=>{document.body.dataset.theme=t;localStorage.setItem('tienda_theme',t)};
 setTheme(localStorage.getItem('tienda_theme')||'light');
 const hash=async(p,s)=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s+':'+p)))].map(b=>b.toString(16).padStart(2,'0')).join('');
-function pop(id){const p=$(id),o=p.classList.contains('on');closePops();if(!o)p.classList.add('on')}
+function pop(id){$('#sb').classList.remove('on');const p=$(id),o=p.classList.contains('on');closePops();if(!o)p.classList.add('on')}
 function closePops(){document.querySelectorAll('.pop').forEach(x=>x.classList.remove('on'))}
 function drawV(){$('#pV').innerHTML=VIEWS.map(([k,l])=>`<button class="mi ${k==view?'on':''}" data-v="${k}">${l}</button>`).join('')}
 function drawG(t){$('#pG').innerHTML=t?`<button class="mi" data-g="b">‹ Ajustes</button>`+THEMES.map(([k,l,c])=>`<button class="mi ${document.body.dataset.theme==k?'on':''}" data-th="${k}"><i class="sw" style="background:${c}"></i>${l}</button>`).join(''):`<button class="mi" data-g="a">Administración</button><button class="mi" data-g="t">Temas</button>`}
 document.addEventListener('click',e=>{
-  const T=e.target,ins=T.closest('.pop,.ib');
+  const T=e.target,ins=T.closest('.pop,.ib,.sb');
   if(T.closest('#bS')){const b=$('#sb');b.classList.toggle('on');closePops();if(b.classList.contains('on'))$('#q').focus();else{$('#q').value='';render()}return}
   if(T.closest('#bV')){drawV();pop('#pV');return}
   if(T.closest('#bG')){drawG();pop('#pG');return}
-  if(!ins)return closePops();
+  if(!ins){closePops();if($('#sb').classList.contains('on')){$('#sb').classList.remove('on');$('#q').value='';render()}return}
   const m=T.closest('[data-v],[data-th],[data-g]');if(!m)return;
   if(m.dataset.v){view=m.dataset.v;localStorage.setItem('tienda_view',view);closePops();render()}
   else if(m.dataset.th){setTheme(m.dataset.th);drawG(1)}
@@ -363,6 +408,7 @@ function loginRender(){
   const go=async()=>{if(!$('#lu'))return;const u=$('#lu').value.trim(),p=$('#lp').value;
     const a=[MAIN,...admins].find(x=>x.u==u);
     if(!a||await hash(p,a.s)!=a.h)return $('#lm').textContent='Usuario o contraseña incorrectos';
+    sess={u,pw:p};const te=vault.tk[u];if(te){const t=await dec(te,p);if(t)cfg.token=t}
     sessionStorage.setItem('tienda_ok','1');ed=null;tab='a';admRender()};
   $('#lg').onclick=go;$('#adm').onkeydown=e=>{if(e.key=='Enter')go()};
 }
@@ -375,14 +421,14 @@ function admUsers(){
   <div class="g2"><div><label>Usuario</label><input id="nu" autocomplete="off"></div><div><label>Contraseña</label><input id="np" type="password" autocomplete="new-password"></div></div>
   <button class="btn p" id="na">Añadir administrador</button><small id="nm" style="color:#e11d48"></small>
   <small style="color:var(--mut)">Después pulsa «Publicar en GitHub» en la pestaña Aplicaciones para guardarlo en la nube.</small></div>`;
-  const sv=()=>localStorage.setItem('tienda_admins',JSON.stringify(admins));
+  const sv=()=>{localStorage.setItem('tienda_admins',JSON.stringify(admins));svV()};
   $('#na').onclick=async()=>{const u=$('#nu').value.trim(),p=$('#np').value;
     if(!u||p.length<6)return $('#nm').textContent='Usuario y contraseña (mínimo 6 caracteres)';
     if(u==MAIN.u||admins.some(a=>a.u==u))return $('#nm').textContent='Ese usuario ya existe';
-    const sa=crypto.randomUUID();admins.push({u,s:sa,h:await hash(p,sa)});sv();admUsers();toast('Administrador añadido')};
-  $('#adm').querySelectorAll('[data-dadm]').forEach(b=>b.onclick=()=>{if(confirm('¿Eliminar administrador?')){admins.splice(b.dataset.dadm,1);sv();admUsers()}});
+    const sa=crypto.randomUUID();admins.push({u,s:sa,h:await hash(p,sa)});await seal(u,p);sv();admUsers();toast('Administrador añadido')};
+  $('#adm').querySelectorAll('[data-dadm]').forEach(b=>b.onclick=()=>{if(confirm('¿Eliminar administrador?')){delete vault.tk[admins[b.dataset.dadm].u];admins.splice(b.dataset.dadm,1);sv();admUsers()}});
 }
-function openAdmin(){sessionStorage.getItem('tienda_ok')=='1'?(ed=null,tab='a',admRender()):loginRender();$('#ovA').classList.add('on')}
+function openAdmin(){sess.pw?(ed=null,tab='a',admRender()):loginRender();$('#ovA').classList.add('on')}
 load();
 </script>
 </body>
