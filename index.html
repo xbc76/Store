@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mi Tienda de Apps</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fff;--card:#fff;--tx:#1f1f1f;--mut:#5f6368;--bd:#e0e3e7;--sf:#f1f3f4;--a1:#01875f;--a2:#4285f4;--a3:#fbbc04;--onp:#fff;--sh:0 1px 4px #0003}
+[data-theme=dark]{--bg:#131314;--card:#1e1f20;--tx:#e3e3e3;--mut:#9aa0a6;--bd:#3c4043;--sf:#2a2b2d;--a1:#3ddc97;--a2:#8ab4f8;--a3:#fdd663;--onp:#00391f;--sh:0 1px 4px #000a}
+[data-theme=medio]{--bg:#3b4260;--card:#4a5275;--tx:#f2f4ff;--mut:#c3c9e6;--bd:#5d6690;--sf:#4f5880;--a1:#ffb454;--a2:#7fc8ff;--a3:#5fe0c0;--onp:#3b2a00;--sh:0 1px 4px #0005}
+[data-theme=crema]{--bg:#fbf3e4;--card:#fffaf0;--tx:#4a3426;--mut:#8f7660;--bd:#ecdcc0;--sf:#f3e6cc;--a1:#c2410c;--a2:#d4a017;--a3:#e07a3f;--onp:#fff;--sh:0 1px 4px #4a342633}
+[data-theme=loto]{--bg:#fdeef6;--card:#fff8fc;--tx:#4a1d4e;--mut:#9a6a9f;--bd:#f4cfe6;--sf:#fadcec;--a1:#c026d3;--a2:#ff7eb6;--a3:#a78bfa;--onp:#fff;--sh:0 1px 4px #4a1d4e33}
+*{box-sizing:border-box;margin:0}
+body{font:15px/1.5 "Google Sans",Roboto,system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;transition:background .3s}
+button,input,select,textarea{font:inherit;color:inherit}
+header{position:sticky;top:0;z-index:20;background:var(--bg);padding:10px 16px;display:flex;gap:12px;align-items:center}
+.logo{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:500;margin-right:auto}
+.logo i{width:32px;height:32px;border-radius:9px;background:conic-gradient(from 200deg,#34a853,#4285f4,#ea4335,#fbbc04,#34a853);display:grid;place-items:center;color:#fff;font-style:normal;font-size:14px}
+.sb{display:none;flex-basis:100%;order:3;max-width:620px;margin:0 auto;position:relative}.sb.on{display:block}
+.sb span{position:absolute;left:16px;top:10px}
+.sb input{border-radius:99px;background:var(--sf);border:0;padding:11px 18px 11px 44px}
+.btn{border-radius:99px;padding:8px 16px;cursor:pointer;background:none;border:1px solid var(--bd);transition:.2s;display:inline-block;text-decoration:none;color:var(--tx)}
+.btn:hover{background:var(--sf)}
+.btn.p{background:var(--a1);color:var(--onp);border:0;font-weight:600}
+.btn.p:hover{filter:brightness(1.1)}
+.btn.on{background:color-mix(in srgb,var(--a1) 18%,var(--bg));color:var(--a1);border-color:var(--a1)}
+.btn.d{color:#e11d48}
+input,select,textarea{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:9px 12px;width:100%}
+select{width:auto;border-radius:99px;background:var(--sf);border:0}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:4px 16px 8px}
+.chip{white-space:nowrap;border-radius:10px;padding:7px 16px;border:1px solid var(--bd);background:none;cursor:pointer}
+.chip.on{background:color-mix(in srgb,var(--a1) 18%,var(--bg));color:var(--a1);border-color:transparent;font-weight:600}
+.bar{display:flex;align-items:center;gap:8px;padding:10px 16px 4px;flex-wrap:wrap}
+.bar h2{font-size:20px;font-weight:500;margin-right:auto}
+.views{display:flex;gap:6px;overflow-x:auto;max-width:100%}
+.views .btn{padding:5px 12px;font-size:13px;white-space:nowrap}
+main{padding:12px 16px 60px;max-width:1500px;margin:auto}
+#grid{display:grid;gap:22px 16px}
+.card{cursor:pointer;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card:hover .ic{transform:scale(1.06)}
+.ban{display:none;height:170px;border-radius:16px;background-size:cover}
+.meta{display:flex;gap:12px;align-items:center;min-width:0}
+.ic{width:56px;height:56px;border-radius:22%;display:grid;place-items:center;font-size:30px;overflow:hidden;flex:none;box-shadow:var(--sh);transition:.2s}
+.ic img{width:100%;height:100%;object-fit:cover}
+.inf{min-width:0;flex:1}.inf h3{font-size:15px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub,.inf p{font-size:12.5px;color:var(--mut)}
+.tag{color:var(--a1);font-weight:500}
+.inf p{display:none}
+.v-big{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}.v-big .ban{display:block}
+.v-small{grid-template-columns:repeat(auto-fill,minmax(110px,1fr))}.v-small .meta{flex-direction:column;align-items:flex-start;gap:8px}.v-small .ic{width:100%;height:auto;aspect-ratio:1;font-size:44px}.v-small .inf{width:100%}
+.v-list{grid-template-columns:1fr}.v-list .ic{width:72px;height:72px;font-size:38px}.v-list .inf p{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.v-list .card{border-bottom:1px solid var(--bd);padding-bottom:14px}
+.v-compact{grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px 16px}.v-compact .ic{width:44px;height:44px;font-size:24px}
+.v-icons{grid-template-columns:repeat(auto-fill,minmax(88px,1fr))}.v-icons .meta{flex-direction:column;text-align:center;gap:6px}.v-icons .ic{width:68px;height:68px;font-size:36px}.v-icons .sub{display:none}.v-icons .inf{width:100%}
+.v-mosaic{grid-template-columns:repeat(auto-fill,minmax(240px,1fr));grid-auto-rows:210px;gap:12px}.v-mosaic .card{position:relative;border-radius:16px;overflow:hidden}.v-mosaic .card:nth-child(5n+1){grid-row:span 2}.v-mosaic .ban{display:block;position:absolute;inset:0;height:auto;border-radius:0}.v-mosaic .meta{position:relative;margin-top:auto;padding:36px 12px 12px;background:linear-gradient(transparent,#000c);color:#fff}.v-mosaic .sub,.v-mosaic .tag{color:#ddd}
+.empty{text-align:center;color:var(--mut);padding:60px}
+.ov{position:fixed;inset:0;background:#0008;z-index:50;display:none;align-items:center;justify-content:center;padding:16px}
+.ov.on{display:flex}
+.mod{background:var(--bg);border-radius:28px;max-width:960px;width:100%;max-height:94vh;overflow:auto;padding:24px;position:relative}
+.x{position:absolute;right:14px;top:14px;padding:6px 12px}
+.hd{display:flex;gap:18px;align-items:center;margin-bottom:16px;padding-right:44px}
+.hd .ic{width:96px;height:96px;font-size:52px}.hd h2{font-size:26px;font-weight:500}
+.go{display:block;width:100%;max-width:360px;text-align:center;padding:12px}
+.seg{display:flex;border-bottom:1px solid var(--bd);margin:18px 0 8px}
+.tab{background:none;border:0;padding:10px 18px;border-bottom:3px solid transparent;color:var(--mut);cursor:pointer;font-weight:500}
+.tab.on{color:var(--a1);border-color:var(--a1)}
+.gal{display:flex;gap:10px;overflow-x:auto;padding:8px 0;scroll-snap-type:x mandatory}
+.gal img{border-radius:14px;scroll-snap-align:start;flex:none;max-height:400px;max-width:92%}
+.gal.m img{max-height:480px;border-radius:20px}
+.txt{white-space:pre-wrap;margin-top:12px;color:var(--mut)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0}
+.f{display:grid;gap:10px}.f label{font-size:12px;color:var(--mut);font-weight:600;display:block;margin-bottom:3px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.th{display:flex;gap:8px;flex-wrap:wrap}.th div{position:relative}.th img{width:70px;height:70px;object-fit:cover;border-radius:10px}
+.th b{position:absolute;top:-6px;right:-6px;background:#e11d48;color:#fff;border-radius:50%;width:20px;height:20px;text-align:center;cursor:pointer;font-size:13px}
+.al{display:flex;gap:10px;align-items:center;padding:8px;border:1px solid var(--bd);border-radius:14px;margin-bottom:6px}
+.al .ic{width:44px;height:44px;font-size:24px}.al span{flex:1}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:10px 18px;border-radius:12px;z-index:99;display:none}
+.nav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:30;background:var(--sf);justify-content:space-around;padding:8px 0 10px}
+.nav button{background:none;border:0;display:flex;flex-direction:column;align-items:center;font-size:11px;color:var(--mut);cursor:pointer;padding:2px 20px}.nav button span{font-size:20px}
+@media(max-width:700px){.nav{display:flex}#admBtn{display:none}main{padding-bottom:90px}header{flex-wrap:wrap}.sb{order:3;flex-basis:100%;max-width:none}.ov{padding:0}.mod{height:100%;max-height:100%;border-radius:0}.g2{grid-template-columns:1fr}.hd .ic{width:76px;height:76px}.toast{bottom:80px}.go{max-width:none}.v-big{grid-template-columns:1fr}}
+.hi{display:flex;gap:4px}
+.ib{width:42px;height:42px;border-radius:50%;border:0;background:none;font-size:20px;cursor:pointer}
+.ib:hover,.ib.on{background:var(--sf)}
+.pop{position:fixed;top:62px;right:12px;z-index:40;background:var(--card);border:1px solid var(--bd);border-radius:16px;box-shadow:0 8px 28px #0004;padding:6px;min-width:220px;display:none}
+.pop.on{display:block}
+.mi{display:block;width:100%;text-align:left;background:none;border:0;padding:10px 14px;border-radius:10px;cursor:pointer}
+.mi:hover{background:var(--sf)}.mi.on{color:var(--a1);font-weight:600;background:color-mix(in srgb,var(--a1) 15%,var(--card))}
+.sw{display:inline-block;width:14px;height:14px;border-radius:50%;margin-right:10px;vertical-align:-2px;border:1px solid var(--bd)}
+.sv{vertical-align:-3px}.ib svg{display:block;margin:auto}
+
+/* ===== Modernización ===== */
+*{scrollbar-width:thin}
+body{font-family:Inter,"Google Sans",Roboto,system-ui,sans-serif;letter-spacing:-.005em;background:radial-gradient(900px 420px at 88% -8%,color-mix(in srgb,var(--a1) 16%,transparent),transparent),radial-gradient(700px 420px at -8% 6%,color-mix(in srgb,var(--a2) 14%,transparent),transparent),var(--bg);background-attachment:fixed}
+header{background:color-mix(in srgb,var(--bg) 70%,transparent);backdrop-filter:blur(18px) saturate(1.5);-webkit-backdrop-filter:blur(18px) saturate(1.5);border-bottom:1px solid color-mix(in srgb,var(--bd) 55%,transparent)}
+.logo{font-weight:700;letter-spacing:-.02em}
+.logo i{background:linear-gradient(135deg,var(--a1),var(--a2));color:var(--onp);border-radius:11px;box-shadow:0 6px 16px -4px color-mix(in srgb,var(--a1) 60%,transparent)}
+.ib{width:44px;height:44px;border-radius:14px;color:var(--tx);transition:.2s}
+.ib:hover,.ib.on{background:var(--sf);transform:translateY(-1px)}
+.sb input{background:var(--card);border:1px solid var(--bd);box-shadow:var(--sh);padding:13px 18px 13px 46px;animation:up .25s}
+.hero{max-width:1500px;margin:auto;padding:30px 16px 6px}
+.hero h1{font-size:clamp(28px,5.5vw,46px);font-weight:700;letter-spacing:-.035em;line-height:1.1;background:linear-gradient(100deg,var(--a1),var(--a2) 55%,var(--a3));-webkit-background-clip:text;background-clip:text;color:transparent;width:fit-content}
+.hero p{color:var(--mut);margin-top:8px}
+.chips{max-width:1500px;margin:auto;padding:14px 16px 10px;scrollbar-width:none}
+.chip{border-radius:99px;background:color-mix(in srgb,var(--card) 80%,transparent);transition:.2s}
+.chip:hover{transform:translateY(-1px);border-color:var(--a1)}
+.chip.on{background:linear-gradient(135deg,var(--a1),var(--a2));color:var(--onp);border-color:transparent;box-shadow:0 6px 16px -6px color-mix(in srgb,var(--a1) 70%,transparent)}
+.btn{transition:.2s}
+.btn.p{background:linear-gradient(135deg,var(--a1),var(--a2));box-shadow:0 8px 20px -8px color-mix(in srgb,var(--a1) 75%,transparent)}
+.btn.p:hover{transform:translateY(-2px);filter:brightness(1.08);background:linear-gradient(135deg,var(--a1),var(--a2))}
+@keyframes up{from{opacity:0;transform:translateY(16px)}}
+@keyframes pp{from{opacity:0;transform:translateY(26px) scale(.97)}}
+.card{background:var(--card);border:1px solid color-mix(in srgb,var(--bd) 70%,transparent);border-radius:24px;padding:10px;box-shadow:var(--sh);animation:up .55s cubic-bezier(.2,.8,.2,1) backwards;transition:transform .3s cubic-bezier(.2,.8,.2,1),box-shadow .3s}
+.card:hover{transform:translateY(-6px);box-shadow:0 22px 44px -16px color-mix(in srgb,var(--a1) 45%,transparent)}
+.ban{border-radius:18px;position:relative;overflow:hidden}
+.ban::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 55%,#0003)}
+.ic{border-radius:24%;box-shadow:0 10px 22px -8px #0006}
+.inf h3{font-weight:600;font-size:15.5px;letter-spacing:-.01em}
+.tag{background:color-mix(in srgb,var(--a1) 14%,transparent);padding:2px 10px;border-radius:99px;font-size:11.5px;font-weight:600}
+.v-list .card{padding:14px}.v-compact .card{padding:8px 12px;border-radius:18px}.v-icons .card{padding:14px 6px}
+.v-mosaic .card{padding:0;border:0;border-radius:24px}.v-mosaic .tag{background:#fff3;color:#fff}
+.v-mosaic .card:hover .ban{transform:scale(1.06)}.v-mosaic .ban{transition:transform .5s}
+.empty{border:2px dashed var(--bd);border-radius:24px;margin:20px 0}
+.pop{background:color-mix(in srgb,var(--card) 86%,transparent);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-radius:22px;padding:8px;animation:pp .2s;box-shadow:0 24px 60px -12px #0006}
+.mi{border-radius:12px;padding:11px 14px}
+.ov{background:rgba(10,10,28,.5);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.mod{border-radius:32px;padding:28px;animation:pp .3s cubic-bezier(.2,.8,.2,1);box-shadow:0 40px 100px -20px #000a}
+.hd h2{font-weight:700;letter-spacing:-.025em;font-size:28px}.hd .ic{border-radius:26%}
+.x{border-radius:50%;width:38px;height:38px;padding:0;background:var(--sf);border:0}
+.seg{display:inline-flex;background:var(--sf);border:0;border-radius:99px;padding:4px;margin:20px 0 10px}
+.tab{border:0;border-radius:99px;padding:8px 20px;transition:.2s}
+.tab.on{background:var(--card);color:var(--tx);box-shadow:var(--sh)}
+.gal img{border-radius:20px;box-shadow:0 14px 30px -14px #0007;transition:transform .3s}.gal img:hover{transform:scale(1.02)}
+.gal.m img{border-radius:28px}
+input:focus,textarea:focus,select:focus{outline:2px solid color-mix(in srgb,var(--a1) 55%,transparent);outline-offset:1px}
+.al{border-radius:18px;background:var(--card);box-shadow:var(--sh)}
+.toast{border-radius:99px;box-shadow:0 12px 30px -8px #0008;padding:12px 22px}
+@media(max-width:700px){.hero{padding-top:18px}.mod{border-radius:0;padding:20px}.chips{padding-top:10px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ===== Arreglo administración móvil ===== */
+.mod{min-width:0;max-width:min(960px,100%);overflow-x:hidden}
+.mod *{min-width:0}
+.f>*,.g2>*{min-width:0}
+.al{flex-wrap:wrap;gap:8px 10px}
+.al span{flex:1 1 130px;overflow-wrap:anywhere}
+.acts{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+.acts .btn,.al>.btn{padding:6px 13px;font-size:13px}
+#adm .row .btn{padding:9px 16px;font-size:14px}
+#adm .row label.btn{cursor:pointer}
+#adm .row label:not(.btn){display:flex;align-items:center;gap:8px;padding:8px 14px;border:1px solid var(--bd);border-radius:99px;background:var(--card);margin:0;font-size:14px;color:var(--tx);font-weight:500}
+#adm input[type=checkbox]{width:18px;height:18px;accent-color:var(--a1);padding:0}
+#adm input[type=file]{padding:6px;font-size:13px}
+#adm input[type=file]::file-selector-button{border:0;border-radius:99px;padding:7px 14px;margin-right:10px;background:var(--sf);color:var(--tx);cursor:pointer}
+#adm details{border:1px solid var(--bd);border-radius:18px;padding:12px 14px;background:var(--card)}
+#adm summary{cursor:pointer;font-weight:600}
+#adm .f .row{margin-top:6px}
+@media(max-width:700px){#adm .row{gap:8px}#adm .row>.btn{flex:1 1 calc(50% - 8px);text-align:center}.hd h2,#adm h2{font-size:24px}.acts{width:100%;margin-left:0}.acts .btn{flex:1;text-align:center}}
+
+/* ===== Galería de la ficha ===== */
+.gal{gap:22px;padding:10px 2px 16px;scroll-snap-type:x mandatory;scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
+.gal img{scroll-snap-align:start;scroll-snap-stop:always;max-width:88%}
+.gal.m img{max-width:70%}
+.seg .tab{padding:9px 24px;display:inline-flex;align-items:center}
+.seg .tab .sv{width:20px;height:20px;vertical-align:0}
+.hd .sub{display:flex;gap:10px}
+
+/* ===== Iconos de dispositivo ===== */
+.dv{display:inline-flex;gap:10px;vertical-align:middle;align-items:center}
+.dv .off{color:#e11d48}
+.card .dv{margin-left:8px;gap:6px}
+.hd .sub{margin-top:10px}
+.gal{margin-top:14px}
+
+/* ===== Etiqueta categoría centrada + iconos verdes ===== */
+.tag{display:inline-flex;align-items:center;justify-content:center;line-height:1;padding:6px 12px;text-align:center;vertical-align:middle}
+.hd .tag{padding:7px 14px}
+.dv>span{color:#16a34a}
+[data-theme=dark] .dv>span,[data-theme=medio] .dv>span{color:#4ade80}
+.v-mosaic .dv>span{color:#86efac}
+[data-theme] .dv>span.off{color:#e11d48}
+[data-theme=dark] .dv>span.off,[data-theme=medio] .dv>span.off,.v-mosaic .dv>span.off{color:#fb7185}
+
+/* ===== Galería: respetar proporción de las imágenes ===== */
+.gal{align-items:flex-start}
+.gal img{height:auto;width:auto;object-fit:contain;flex:0 0 auto}
+.gal.d img{width:88%;max-width:760px;max-height:none}
+.gal.m img{width:auto;max-height:480px;max-width:70%}
+
+/* ===== Galería: marcos uniformes ===== */
+.gal img{object-fit:cover;object-position:center top;height:auto}
+.gal.d img{aspect-ratio:16/10;width:88%;max-width:760px;max-height:none}
+.gal.m img{aspect-ratio:9/19.5;width:min(280px,66%);max-width:none;max-height:none}
+
+/* ===== Galería: marcos 16:9 y 9:20 sin recortar ===== */
+.gal img{object-fit:contain;object-position:center;background:var(--sf)}
+.gal.d img{aspect-ratio:16/9}
+.gal.m img{aspect-ratio:9/20}
+</style>
+</head>
+<body data-theme="light">
+<header>
+  <div class="logo"><i>▶</i>Mi Tienda</div>
+  <div class="hi">
+    <button class="ib" id="bS" title="Buscar"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
+    <button class="ib" id="bV" title="Vista"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/></svg></button>
+    <button class="ib" id="bG" title="Ajustes"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></button>
+  </div>
+  <div class="sb" id="sb"><span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span><input id="q" type="search" placeholder="Buscar aplicaciones"></div>
+</header>
+<div class="pop" id="pV"></div><div class="pop" id="pG"></div>
+<section class="hero"><h1>Mi colección de apps</h1><p id="cnt"></p></section>
+<div class="chips" id="chips"></div>
+<main><div id="grid" class="v-big"></div></main>
+
+<div class="ov" id="ovD"><div class="mod" id="det"></div></div>
+<div class="ov" id="ovA"><div class="mod" id="adm"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const VIEWS=[['big','Cuadrícula grande'],['small','Cuadrícula pequeña'],['list','Lista'],['compact','Compacta'],['icons','Iconos'],['mosaic','Mosaico']];
+const GRADS=['#6c5ce7,#ff6b9d','#00c2ff,#6c5ce7','#ff9f43,#ff6b9d','#10b981,#00c2ff','#f43f5e,#f59e0b','#8b5cf6,#22d3ee'];
+let apps=[],cfg=JSON.parse(localStorage.getItem('tienda_cfg')||'{"repo":"","branch":"main","path":"apps.json","token":""}');
+let cat='Todas',view=localStorage.getItem('tienda_view')||'big',ed=null;
+const save=()=>localStorage.setItem('tienda_cfg',JSON.stringify(cfg));
+function toast(t){const e=$('#toast');e.textContent=t;e.style.display='block';setTimeout(()=>e.style.display='none',2800)}
+
+async function load(){
+  try{const r=await fetch(cfg.path+'?t='+Date.now());const j=await r.json();apps=j.apps||[];admins=j.admins||[]}catch(e){apps=[]}
+  if(cfg.token)try{const x=JSON.parse(localStorage.getItem('tienda_admins'));if(x)admins=x}catch(e){}
+  const d=localStorage.getItem('tienda_draft');if(d&&cfg.token){try{apps=JSON.parse(d)}catch(e){}}
+  if(!apps.length)apps=[{id:'demo',name:'App de ejemplo',url:'#',cat:'Ejemplos',icon:'',desc:'Añade tus apps desde Administración.',text:'Esta es una ficha de ejemplo.',color:0,desk:true,mob:true,imgD:[],imgM:[]}];
+  render();
+}
+const draft=()=>localStorage.setItem('tienda_draft',JSON.stringify(apps));
+
+function iconHtml(a){const i=a.icon||'';return /^(data:|https?:)/.test(i)?`<div class="ic"><img src="${esc(i)}"></div>`:`<div class="ic" style="background:linear-gradient(135deg,${GRADS[(a.color||0)%GRADS.length]});color:#fff">${esc(i||(a.name||'?')[0].toUpperCase())}</div>`}
+function render(){
+    const cats=['Todas',...new Set(apps.map(a=>a.cat).filter(Boolean))];
+  $('#chips').innerHTML=cats.map(c=>`<button class="chip ${c==cat?'on':''}" data-c="${esc(c)}">${esc(c)}</button>`).join('');
+  $('#cnt').textContent=apps.length+(apps.length==1?' aplicación':' aplicaciones')+' · '+(cats.length-1)+(cats.length==2?' categoría':' categorías');
+  const q=$('#q').value.toLowerCase();
+  const l=apps.filter(a=>(cat=='Todas'||a.cat==cat)&&(a.name+a.desc+a.cat).toLowerCase().includes(q));
+  const g=$('#grid');g.className='v-'+view;
+  g.innerHTML=l.length?l.map((a,n)=>{
+    const cover=(a.imgD&&a.imgD[0])||(a.imgM&&a.imgM[0]);const bg=cover?`url(${cover}) center/cover`:`linear-gradient(135deg,${GRADS[(a.color||0)%GRADS.length]})`;return `<article class="card" data-id="${esc(a.id)}" style="animation-delay:${Math.min(n,14)*35}ms"><div class="ban" style="background:${bg}"></div><div class="meta">${iconHtml(a)}<div class="inf"><h3>${esc(a.name)}</h3><div class="sub"><span class="tag">${esc(a.cat)}</span> ${devIc(a)}</div><p>${esc(a.desc)}</p></div></div></article>`}).join(''):'<div class="empty">No hay aplicaciones todavía </div>';
+}
+$('#chips').onclick=e=>{if(e.target.dataset.c){cat=e.target.dataset.c;render()}};
+$('#q').oninput=render;
+
+/* Ficha */
+let dev='d';
+function openDet(id){
+  const a=apps.find(x=>x.id==id);if(!a)return;
+  const hd=a.desk!==false&&(a.imgD||[]).length>0,hm=a.mob!==false&&(a.imgM||[]).length>0;dev=hd?'d':hm?'m':(a.desk!==false?'d':'m');
+  const draw=()=>{
+    const imgs=(dev=='d'?a.imgD:a.imgM)||[];
+    $('#det').innerHTML=`<button class="btn x" data-close>✕</button>
+    <div class="hd">${iconHtml(a)}<div><h2>${esc(a.name)}</h2><div class="tag" style="font-size:15px">${esc(a.cat)}</div><div class="sub">${devIc(a)}</div></div></div>
+    ${a.url&&a.url!='#'?`<a class="btn p go" href="${esc(a.url)}" target="_blank" rel="noopener">▶ Abrir aplicación</a>`:''}
+    ${hd&&hm?'<div class="seg">':'<div hidden>'}${a.desk!==false?`<button class="tab ${dev=='d'?'on':''}" data-dev="d" title="Ordenador" aria-label="Ordenador">${I.d}</button>`:''}${a.mob!==false?`<button class="tab ${dev=='m'?'on':''}" data-dev="m" title="Móvil" aria-label="Móvil">${I.m}</button>`:''}</div>
+    <div class="gal ${dev}">${imgs.length?imgs.map(i=>`<img src="${i}" loading="lazy">`).join(''):'<div class="empty">Sin imágenes para esta versión</div>'}</div>
+    <h3 style="margin-top:18px;font-weight:500">Acerca de esta app →</h3><p style="margin-top:6px">${esc(a.desc)}</p><div class="txt">${esc(a.text)}</div>`;
+    $('#det').querySelectorAll('[data-dev]').forEach(b=>b.onclick=()=>{dev=b.dataset.dev;draw()});
+  };
+  draw();$('#ovD').classList.add('on');
+}
+$('#grid').onclick=e=>{const c=e.target.closest('.card');if(c)openDet(c.dataset.id)};
+document.addEventListener('click',e=>{if(e.target.closest('[data-close]')||e.target.classList.contains('ov'))document.querySelectorAll('.ov').forEach(o=>o.classList.remove('on'))});
+
+/* Administración */
+function compress(file,max){return new Promise(res=>{const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const k=Math.min(1,max/im.width),c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',.78))};im.src=r.result};r.readAsDataURL(file)})}
+function thumbs(k){return ed[k].map((s,i)=>`<div><img src="${s}"><b data-rm="${k}:${i}">×</b></div>`).join('')}
+function admApps(){
+  const e=ed;
+  $('#adm').innerHTML=`<button class="btn x" data-close>✕</button><h2>Administración</h2>${tabsHtml()}`+(e?`
+  <div class="f" style="margin-top:12px">
+   <div class="g2"><div><label>Nombre</label><input id="fn" value="${esc(e.name)}"></div><div><label>Categoría</label><input id="fc" value="${esc(e.cat)}"></div></div>
+   <div><label>URL de la app (GitHub Pages)</label><input id="fu" value="${esc(e.url)}" placeholder="https://usuario.github.io/app/"></div>
+   <div class="g2"><div><label>Icono (emoji o URL)</label><input id="fi" value="${/^data:/.test(e.icon)?'':esc(e.icon)}" placeholder="🎮"></div><div><label>…o subir imagen de icono</label><input type="file" id="fif" accept="image/*"></div></div>
+   <div><label>Descripción corta</label><input id="fd" value="${esc(e.desc)}"></div>
+   <div><label>Texto completo</label><textarea id="ft" rows="4">${esc(e.text)}</textarea></div>
+   <div><label>Color de portada</label><select id="fcol">${GRADS.map((g,i)=>`<option value="${i}" ${e.color==i?'selected':''}>Degradado ${i+1}</option>`).join('')}</select></div>
+   <div class="row"><label><input type="checkbox" id="fdk" ${e.desk!==false?'checked':''} style="width:auto"> ${I.d} Versión ordenador</label><label><input type="checkbox" id="fmb" ${e.mob!==false?'checked':''} style="width:auto"> ${I.m} Versión móvil</label></div>
+   <div><label>${I.d} Imágenes ordenador</label><input type="file" id="fid" accept="image/*" multiple><div class="th" style="margin-top:6px">${thumbs('imgD')}</div></div>
+   <div><label>${I.m} Imágenes móvil</label><input type="file" id="fim" accept="image/*" multiple><div class="th" style="margin-top:6px">${thumbs('imgM')}</div></div>
+   <div class="row"><button class="btn p" id="sv">Guardar ficha</button><button class="btn" id="cn">Cancelar</button></div></div>`:`
+  <div class="row" style="margin-top:12px"><button class="btn p" id="nw">Nueva aplicación</button><button class="btn" id="pub">Publicar en GitHub</button><button class="btn" id="exp">Exportar JSON</button><button class="btn" id="lo">Salir</button><label class="btn">Importar<input type="file" id="imp" accept=".json" hidden></label></div>
+  <div style="margin:10px 0">${apps.map((a,i)=>`<div class="al">${iconHtml(a)}<span><b>${esc(a.name)}</b><br><small>${esc(a.cat)}</small></span><div class="acts"><button class="btn" data-up="${i}">↑</button><button class="btn" data-ed="${i}">Editar</button><button class="btn d" data-del="${i}">Borrar</button></div></div>`).join('')}</div>
+  <details><summary><b>Conexión con GitHub (nube)</b></summary><div class="f" style="margin-top:8px">
+   <div class="g2"><div><label>Repositorio (usuario/repo)</label><input id="cr" value="${esc(cfg.repo)}"></div><div><label>Rama</label><input id="cb" value="${esc(cfg.branch)}"></div></div>
+   <div class="g2"><div><label>Archivo de datos</label><input id="cp" value="${esc(cfg.path)}"></div><div><label>Token personal (permiso Contents: write)</label><input id="ct" type="password" value="${esc(cfg.token)}"></div></div>
+   <button class="btn" id="cs">Guardar conexión</button><small style="color:var(--mut)">El token se guarda solo en este navegador. Nunca lo subas al repositorio.</small></div></details>`);
+  const A=$('#adm'),on=(s,f)=>{const x=A.querySelector(s);if(x)x.onclick=f};
+  on('#nw',()=>{ed={id:'a'+Date.now(),name:'',cat:'',url:'',icon:'',desc:'',text:'',color:0,desk:true,mob:true,imgD:[],imgM:[]};admRender()});
+  on('#cn',()=>{ed=null;admRender()});
+  on('#sv',()=>{if(!$('#fn').value.trim())return toast('Falta el nombre');
+    Object.assign(ed,{name:$('#fn').value.trim(),cat:$('#fc').value.trim(),url:$('#fu').value.trim(),desc:$('#fd').value,text:$('#ft').value,color:+$('#fcol').value,desk:$('#fdk').checked,mob:$('#fmb').checked});
+    if($('#fi').value.trim())ed.icon=$('#fi').value.trim();
+    const i=apps.findIndex(a=>a.id==ed.id);i<0?apps.push(ed):apps[i]=ed;
+    apps=apps.filter(a=>a.id!='demo'||apps.length==1);draft();ed=null;admRender();render();toast('Guardado (pendiente de publicar)')});
+  const up=(s,k,max)=>{const x=A.querySelector(s);if(x)x.onchange=async()=>{for(const f of x.files)ed[k].push(await compress(f,max));keep();admRender()}};
+  const keep=()=>{Object.assign(ed,{name:$('#fn').value,cat:$('#fc').value,url:$('#fu').value,desc:$('#fd').value,text:$('#ft').value,color:+$('#fcol').value,desk:$('#fdk').checked,mob:$('#fmb').checked});if($('#fi').value.trim())ed.icon=$('#fi').value.trim()};
+  up('#fid','imgD',1000);up('#fim','imgM',600);
+  const fi=A.querySelector('#fif');if(fi)fi.onchange=async()=>{keep();ed.icon=await compress(fi.files[0],128);admRender()};
+  A.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{keep();const[k,i]=b.dataset.rm.split(':');ed[k].splice(i,1);admRender()});
+  A.querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>{ed=JSON.parse(JSON.stringify(apps[b.dataset.ed]));ed.imgD=ed.imgD||[];ed.imgM=ed.imgM||[];admRender()});
+  A.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{if(confirm('¿Eliminar?')){apps.splice(b.dataset.del,1);draft();admRender();render()}});
+  A.querySelectorAll('[data-up]').forEach(b=>b.onclick=()=>{const i=+b.dataset.up;if(i>0){[apps[i-1],apps[i]]=[apps[i],apps[i-1]];draft();admRender();render()}});
+  on('#exp',()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify({apps,admins},null,1)],{type:'application/json'}));a.download='apps.json';a.click()});
+  const im=A.querySelector('#imp');if(im)im.onchange=async()=>{try{apps=JSON.parse(await im.files[0].text()).apps;draft();admRender();render();toast('Importado')}catch(e){toast('JSON no válido')}};
+  on('#cs',()=>{cfg={repo:$('#cr').value.trim(),branch:$('#cb').value.trim()||'main',path:$('#cp').value.trim()||'apps.json',token:$('#ct').value.trim()};save();toast('Conexión guardada')});
+  on('#pub',publish);on('#lo',()=>{sessionStorage.removeItem('tienda_ok');$('#ovA').classList.remove('on')});
+}
+async function publish(){
+  if(!cfg.repo||!cfg.token)return toast('Configura repositorio y token');
+  const u=`https://api.github.com/repos/${cfg.repo}/contents/${cfg.path}`,h={Authorization:'Bearer '+cfg.token,Accept:'application/vnd.github+json'};
+  try{
+    toast('Publicando…');
+    let sha;const r=await fetch(u+'?ref='+cfg.branch,{headers:h});if(r.ok)sha=(await r.json()).sha;
+    const body={message:'Actualizar tienda',branch:cfg.branch,content:btoa(unescape(encodeURIComponent(JSON.stringify({apps,admins})))),sha};
+    const p=await fetch(u,{method:'PUT',headers:h,body:JSON.stringify(body)});
+    if(!p.ok)throw new Error((await p.json()).message);
+    localStorage.removeItem('tienda_draft');localStorage.removeItem('tienda_admins');toast('Publicado en la nube');
+  }catch(e){toast('Error: '+e.message)}
+}
+const I={d:`<svg class="sv" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>`,m:`<svg class="sv" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="3" width="10" height="18" rx="2.5"/><path d="M11 18h2"/></svg>`};
+const devIc=a=>`<span class="dv"><span class="${a.desk!==false?'':'off'}" title="${a.desk!==false?'Ordenador':'Ordenador: no disponible'}">${I.d}</span><span class="${a.mob!==false?'':'off'}" title="${a.mob!==false?'Móvil':'Móvil: no disponible'}">${I.m}</span></span>`;
+const THEMES=[['light','Claro','#ffffff'],['dark','Oscuro','#131314'],['medio','Medio','#3b4260'],['crema','Crema','#fbf3e4'],['loto','Loto','#fdeef6']];
+let admins=[],tab='a';
+const MAIN={u:'xavibc',s:'tienda-xavibc',h:'1b6bf2a2c37ed4db7960a8af1c0c1d69b22dc76af4a2549d4b2ba8d81fdaf8c8'};
+const setTheme=t=>{document.body.dataset.theme=t;localStorage.setItem('tienda_theme',t)};
+setTheme(localStorage.getItem('tienda_theme')||'light');
+const hash=async(p,s)=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s+':'+p)))].map(b=>b.toString(16).padStart(2,'0')).join('');
+function pop(id){const p=$(id),o=p.classList.contains('on');closePops();if(!o)p.classList.add('on')}
+function closePops(){document.querySelectorAll('.pop').forEach(x=>x.classList.remove('on'))}
+function drawV(){$('#pV').innerHTML=VIEWS.map(([k,l])=>`<button class="mi ${k==view?'on':''}" data-v="${k}">${l}</button>`).join('')}
+function drawG(t){$('#pG').innerHTML=t?`<button class="mi" data-g="b">‹ Ajustes</button>`+THEMES.map(([k,l,c])=>`<button class="mi ${document.body.dataset.theme==k?'on':''}" data-th="${k}"><i class="sw" style="background:${c}"></i>${l}</button>`).join(''):`<button class="mi" data-g="a">Administración</button><button class="mi" data-g="t">Temas</button>`}
+document.addEventListener('click',e=>{
+  const T=e.target,ins=T.closest('.pop,.ib');
+  if(T.closest('#bS')){const b=$('#sb');b.classList.toggle('on');closePops();if(b.classList.contains('on'))$('#q').focus();else{$('#q').value='';render()}return}
+  if(T.closest('#bV')){drawV();pop('#pV');return}
+  if(T.closest('#bG')){drawG();pop('#pG');return}
+  if(!ins)return closePops();
+  const m=T.closest('[data-v],[data-th],[data-g]');if(!m)return;
+  if(m.dataset.v){view=m.dataset.v;localStorage.setItem('tienda_view',view);closePops();render()}
+  else if(m.dataset.th){setTheme(m.dataset.th);drawG(1)}
+  else if(m.dataset.g=='t')drawG(1);
+  else if(m.dataset.g=='b')drawG();
+  else if(m.dataset.g=='a'){closePops();openAdmin()}
+});
+const tabsHtml=()=>`<div class="seg"><button class="tab ${tab=='a'?'on':''}" data-tab="a">Aplicaciones</button><button class="tab ${tab=='u'?'on':''}" data-tab="u">Administradores</button></div>`;
+const admRender=()=>tab=='u'?admUsers():admApps();
+document.addEventListener('click',e=>{const t=e.target.closest('[data-tab]');if(t){tab=t.dataset.tab;ed=null;admRender()}});
+function loginRender(){
+  $('#adm').innerHTML=`<button class="btn x" data-close>✕</button><h2>Acceso de administración</h2>
+  <div class="f" style="margin-top:14px;max-width:380px">
+  <div><label>Usuario</label><input id="lu" autocomplete="username"></div>
+  <div><label>Contraseña</label><input id="lp" type="password" autocomplete="current-password"></div>
+  <button class="btn p" id="lg">Entrar</button><small id="lm" style="color:#e11d48"></small></div>`;
+  const go=async()=>{if(!$('#lu'))return;const u=$('#lu').value.trim(),p=$('#lp').value;
+    const a=[MAIN,...admins].find(x=>x.u==u);
+    if(!a||await hash(p,a.s)!=a.h)return $('#lm').textContent='Usuario o contraseña incorrectos';
+    sessionStorage.setItem('tienda_ok','1');ed=null;tab='a';admRender()};
+  $('#lg').onclick=go;$('#adm').onkeydown=e=>{if(e.key=='Enter')go()};
+}
+function admUsers(){
+  $('#adm').innerHTML=`<button class="btn x" data-close>✕</button><h2>Administración</h2>${tabsHtml()}
+  <div class="f" style="margin-top:10px">
+  <div class="al"><span><b>${esc(MAIN.u)}</b><br><small>Administrador principal · fijo, no se puede modificar ni eliminar</small></span></div>
+  ${admins.map((a,i)=>`<div class="al"><span><b>${esc(a.u)}</b></span><button class="btn d" data-dadm="${i}">Eliminar</button></div>`).join('')}
+  <h3 style="font-weight:500;margin-top:8px">Añadir administrador</h3>
+  <div class="g2"><div><label>Usuario</label><input id="nu" autocomplete="off"></div><div><label>Contraseña</label><input id="np" type="password" autocomplete="new-password"></div></div>
+  <button class="btn p" id="na">Añadir administrador</button><small id="nm" style="color:#e11d48"></small>
+  <small style="color:var(--mut)">Después pulsa «Publicar en GitHub» en la pestaña Aplicaciones para guardarlo en la nube.</small></div>`;
+  const sv=()=>localStorage.setItem('tienda_admins',JSON.stringify(admins));
+  $('#na').onclick=async()=>{const u=$('#nu').value.trim(),p=$('#np').value;
+    if(!u||p.length<6)return $('#nm').textContent='Usuario y contraseña (mínimo 6 caracteres)';
+    if(u==MAIN.u||admins.some(a=>a.u==u))return $('#nm').textContent='Ese usuario ya existe';
+    const sa=crypto.randomUUID();admins.push({u,s:sa,h:await hash(p,sa)});sv();admUsers();toast('Administrador añadido')};
+  $('#adm').querySelectorAll('[data-dadm]').forEach(b=>b.onclick=()=>{if(confirm('¿Eliminar administrador?')){admins.splice(b.dataset.dadm,1);sv();admUsers()}});
+}
+function openAdmin(){sessionStorage.getItem('tienda_ok')=='1'?(ed=null,tab='a',admRender()):loginRender();$('#ovA').classList.add('on')}
+load();
+</script>
+</body>
+</html>
