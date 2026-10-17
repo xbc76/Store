@@ -257,21 +257,63 @@ input:focus,textarea:focus,select:focus{outline:2px solid color-mix(in srgb,var(
   .ib{width:38px;height:38px}
   .pop,.sb{top:68px}
 }
+
+/* ===== Cabecera móvil en dos filas ===== */
+.pop,.sb{top:calc(var(--hh,70px) + 6px)!important}
+@media(max-width:700px){
+  header{flex-wrap:wrap;gap:2px 0;padding:8px 12px 6px}
+  .logo{flex:1 1 100%;font-size:clamp(24px,7.4vw,32px);gap:10px;margin-right:0}
+  .lg{width:clamp(44px,13vw,56px);height:clamp(44px,13vw,56px)}
+  .hi{flex:1 1 100%;justify-content:space-around}
+  .ib{width:44px;height:44px}
+}
+
+/* ===== Cabecera: logo + buscar + ajustes ===== */
+@media(max-width:700px){
+  header{flex-wrap:nowrap;gap:6px;padding:8px 12px}
+  .hi{flex:0 0 auto;justify-content:flex-end}
+  .logo{flex:1 1 auto;min-width:0;font-size:clamp(22px,6.8vw,32px)}
+  .lg{width:clamp(42px,12.5vw,56px);height:clamp(42px,12.5vw,56px)}
+}
+
+/* ===== Panel: pestañas y botones principales ===== */
+#adm .seg .tab{flex:0 0 auto}
+#adm .row>.btn,#adm .row>label.btn{border-radius:14px;white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;min-height:44px;font-weight:700}
+@media(max-width:700px){
+  #adm .seg{display:grid;grid-template-columns:1fr 1fr;gap:4px;border-radius:22px;width:100%;overflow:visible}
+  #adm .seg .tab{width:100%;padding:10px 8px;text-align:center;justify-content:center;font-size:14px}
+  #adm .row>.btn,#adm .row>label.btn{flex:1 1 100%}
+}
+
+/* ===== Pantalla de edición de aplicación ===== */
+.eh{display:flex;align-items:center;gap:14px;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--bd)}
+.eh h2{font-size:22px;font-weight:700;letter-spacing:-.02em}
+.eh .btn{padding:8px 16px;white-space:nowrap;font-weight:600}
+#adm .f>.row:last-child{position:sticky;bottom:-24px;z-index:3;margin:6px -4px 0;padding:12px 4px;background:var(--bg);border-top:1px solid var(--bd)}
+@media(max-width:700px){#adm .f>.row:last-child{bottom:-20px}}
+
+/* ===== Diálogos integrados ===== */
+@keyframes fade{from{opacity:0}}
+.dgo{position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(10,10,28,.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);animation:fade .15s}
+.dlg{background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:28px;padding:26px 24px 22px;width:min(420px,100%);box-shadow:0 40px 100px -20px #000b;animation:pp .25s cubic-bezier(.2,.8,.2,1)}
+.dlg h3{font-size:20px;font-weight:700;letter-spacing:-.02em}
+.dlg p{color:var(--mut);margin:8px 0 18px}
+.dlg input{margin:-4px 0 18px}
+.dact{display:flex;gap:10px;justify-content:flex-end}
+.dact .btn{min-height:46px;padding:10px 22px;border-radius:14px;font-weight:700}
+@media(max-width:700px){.dact .btn{flex:1}}
 </style>
 </head>
 <body data-theme="light">
 <header>
   <div class="logo"><img class="lg" src="icon-192.png" alt=""><span>Store <span class="sl" style="--c:#ef4444">S</span><span class="sl" style="--c:#f97316">t</span><span class="sl" style="--c:#eab308">u</span><span class="sl" style="--c:#22c55e">d</span><span class="sl" style="--c:#06b6d4">i</span><span class="sl" style="--c:#a855f7">o</span></span></div>
   <div class="hi">
-    <button class="ib" id="bI" title="Instalar aplicación" hidden><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0-4-4m4 4 4-4M5 19h14"/></svg></button>
     <button class="ib" id="bS" title="Buscar"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
-    <button class="ib" id="bV" title="Vista"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/></svg></button>
-    <button class="ib" id="bT" title="Tema"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg></button>
     <button class="ib" id="bG" title="Ajustes"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></button>
   </div>
   <div class="sb" id="sb"><span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span><input id="q" type="search" placeholder="Buscar aplicaciones"></div>
 </header>
-<div class="pop" id="pV"></div><div class="pop" id="pT"></div>
+<div class="pop" id="pG"></div>
 <div class="chips" id="chips"></div>
 <main><div id="grid" class="v-big"></div></main>
 
@@ -331,7 +373,7 @@ function openDet(id){
   draw();$('#ovD').classList.add('on');
 }
 $('#grid').onclick=e=>{const c=e.target.closest('.card');if(c)openDet(c.dataset.id)};
-document.addEventListener('click',e=>{if(e.target.closest('[data-close]')||e.target.classList.contains('ov'))document.querySelectorAll('.ov').forEach(o=>o.classList.remove('on'))});
+document.addEventListener('click',e=>{if(e.target.closest('[data-close]')||(e.target.classList.contains('ov')&&!(e.target.id=='ovA'&&ed)))document.querySelectorAll('.ov').forEach(o=>o.classList.remove('on'))});
 
 /* Administración */
 function compress(file,max,icon){return new Promise(res=>{const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{
@@ -345,7 +387,7 @@ function compress(file,max,icon){return new Promise(res=>{const r=new FileReader
 function thumbs(k){return ed[k].map((s,i)=>`<div><img src="${U(s)}"><b data-rm="${k}:${i}">×</b></div>`).join('')}
 function admApps(){
   const e=ed;
-  $('#adm').innerHTML=`<button class="btn x" data-close>✕</button><h2>Administración</h2>${tabsHtml()}`+(tab=='r'?`
+  $('#adm').innerHTML=`${e&&tab=='a'?`<div class="eh"><h2>${apps.some(a=>a.id==e.id)?'Editar aplicación':'Nueva aplicación'}</h2></div>`:`<button class="btn x" data-close>✕</button><h2>Edición</h2>${tabsHtml()}`}`+(tab=='r'?`
   <div class="f" style="margin-top:12px"><h3 style="font-weight:500">Copia de seguridad</h3>
    <small style="color:var(--mut)">Exporta todos los datos (aplicaciones, administradores y conexión cifrada) a un archivo JSON, o restáuralos desde uno.</small>
    <div class="row"><button class="btn p" id="exp">Exportar</button><label class="btn">Importar<input type="file" id="imp" accept=".json" hidden></label></div>
@@ -369,8 +411,8 @@ function admApps(){
   <div class="row" style="margin-top:12px"><button class="btn p" id="nw">Nueva aplicación</button><button class="btn ok" id="pub">Publicar en GitHub</button><button class="btn" id="lo">Salir</button></div>
   <div style="margin:10px 0">${apps.map((a,i)=>`<div class="al">${iconHtml(a)}<span><b>${esc(a.name)}</b><br><small>${esc(a.cat)}</small></span><div class="acts"><button class="btn" data-up="${i}">↑</button><button class="btn ed" data-ed="${i}">Editar</button><button class="btn d" data-del="${i}">Borrar</button></div></div>`).join('')}</div>`);
   const A=$('#adm'),on=(s,f)=>{const x=A.querySelector(s);if(x)x.onclick=f};
-  on('#nw',()=>{ed={id:'a'+Date.now(),name:'',cat:'',url:'',icon:'',desc:'',text:'',color:0,desk:true,mob:true,imgD:[],imgM:[]};admRender()});
-  on('#cn',()=>{ed=null;admRender()});
+  on('#nw',()=>{edSnap=null;ed={id:'a'+Date.now(),name:'',cat:'',url:'',icon:'',desc:'',text:'',color:0,desk:true,mob:true,imgD:[],imgM:[]};admRender()});
+  on('#cn',async()=>{keep();if(JSON.stringify(ed)!=edSnap&&!await ask('Si sales ahora, se perderán los cambios que no hayas guardado.',{title:'¿Descartar los cambios?',ok:'Descartar',cancel:'Seguir editando',danger:true}))return;ed=null;edSnap=null;admRender()});
   on('#sv',()=>{if(!$('#fn').value.trim())return toast('Falta el nombre');
     Object.assign(ed,{name:$('#fn').value.trim(),cat:$('#fc').value.trim(),url:$('#fu').value.trim(),desc:$('#fd').value,text:clean($('#ft').innerHTML),color:+$('#fcol').value,desk:$('#fdk').checked,mob:$('#fmb').checked});
     if($('#fi').value.trim())ed.icon=$('#fi').value.trim();
@@ -388,14 +430,15 @@ function admApps(){
     ['keyup','mouseup','input','blur'].forEach(v=>ft.addEventListener(v,saveSel));
     const ex=(c,v)=>{ft.focus();if(saved){const g=getSelection();g.removeAllRanges();g.addRange(saved)}document.execCommand('styleWithCSS',false,true);document.execCommand(c,false,v||null);saveSel()};
     ft.onpaste=ev=>{ev.preventDefault();const h=ev.clipboardData.getData('text/html'),t=ev.clipboardData.getData('text/plain');document.execCommand('insertHTML',false,h?clean(h):esc(t).replace(/\n/g,'<br>'))};
-    A.querySelectorAll('.tb [data-c]').forEach(b=>{b.onmousedown=ev=>ev.preventDefault();b.onclick=()=>{const c=b.dataset.c;if(c=='link'){const u=prompt('Dirección del enlace (https://…)');if(u)ex('createLink',u)}else ex(c)}});
+    A.querySelectorAll('.tb [data-c]').forEach(b=>{b.onmousedown=ev=>ev.preventDefault();b.onclick=async()=>{const c=b.dataset.c;if(c=='link'){const u=await ask('Escribe la dirección completa del enlace.',{title:'Insertar enlace',input:true,ph:'https://…',ok:'Insertar'});if(u)ex('createLink',u)}else ex(c)}});
     A.querySelectorAll('.tb select').forEach(sl=>sl.onchange=()=>{if(!sl.value)return;ex(sl.dataset.s,sl.dataset.s=='formatBlock'?'<'+sl.value+'>':sl.value);sl.selectedIndex=0});
     A.querySelectorAll('.tb input[type=color]').forEach(ci=>ci.oninput=()=>ex(ci.dataset.k,ci.value));
   }
   A.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{keep();const[k,i]=b.dataset.rm.split(':');ed[k].splice(i,1);admRender()});
-  A.querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>{ed=JSON.parse(JSON.stringify(apps[b.dataset.ed]));ed.imgD=ed.imgD||[];ed.imgM=ed.imgM||[];admRender()});
-  A.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{if(confirm('¿Eliminar?')){apps.splice(b.dataset.del,1);draft();admRender();render()}});
+  A.querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>{edSnap=null;ed=JSON.parse(JSON.stringify(apps[b.dataset.ed]));ed.imgD=ed.imgD||[];ed.imgM=ed.imgM||[];admRender()});
+  A.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{if(await ask('Se eliminará «'+apps[b.dataset.del].name+'». Sus imágenes se borrarán de GitHub al publicar.',{title:'¿Eliminar aplicación?',ok:'Eliminar',danger:true})){apps.splice(b.dataset.del,1);draft();admRender();render()}});
   A.querySelectorAll('[data-up]').forEach(b=>b.onclick=()=>{const i=+b.dataset.up;if(i>0){[apps[i-1],apps[i]]=[apps[i],apps[i-1]];draft();admRender();render()}});
+  if(e&&tab=='a'&&!edSnap){keep();edSnap=JSON.stringify(ed)}
   on('#exp',()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify({apps,admins,vault},null,1)],{type:'application/json'}));a.download='apps.json';a.click()});
   const im=A.querySelector('#imp');if(im)im.onchange=async()=>{try{const j=JSON.parse(await im.files[0].text());apps=j.apps||[];if(j.admins){admins=j.admins;localStorage.setItem('tienda_admins',JSON.stringify(admins))}if(j.vault){vault=j.vault;vault.tk=vault.tk||{}}svV();draft();admRender();render();toast('Importado')}catch(e){toast('JSON no válido')}};
   on('#cs',async()=>{cfg={repo:$('#cr').value.trim(),branch:$('#cb').value.trim()||'main',path:$('#cp').value.trim()||'apps.json',token:$('#ct').value.trim()};save();Object.assign(vault,{repo:cfg.repo,branch:cfg.branch,path:cfg.path});await seal(sess.u,sess.pw);svV();toast('Conexión guardada')});
@@ -463,6 +506,15 @@ ${tbtn('link','Insertar enlace',sv2('<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0
 <span class="sep"></span>
 ${tbtn('undo','Deshacer',sv2('<path d="M9 14 4 9l5-5M4 9h10a6 6 0 0 1 0 12h-3"/>'))}${tbtn('redo','Rehacer',sv2('<path d="m15 14 5-5-5-5M20 9H10a6 6 0 0 0 0 12h3"/>'))}
 </div>`;
+function ask(msg,o={}){return new Promise(res=>{
+  const d=document.createElement('div');d.className='dgo';
+  d.innerHTML=`<div class="dlg" role="dialog"><h3>${esc(o.title||'Confirmar')}</h3><p>${esc(msg)}</p>${o.input?`<input id="dgi" placeholder="${esc(o.ph||'')}">`:''}<div class="dact"><button class="btn" data-r="0">${esc(o.cancel||'Cancelar')}</button><button class="btn ${o.danger?'d':'p'}" data-r="1">${esc(o.ok||'Aceptar')}</button></div></div>`;
+  document.body.appendChild(d);
+  const i=d.querySelector('#dgi'),done=v=>{d.remove();res(v)},no=()=>done(o.input?null:false);
+  d.onclick=e=>{const b=e.target.closest('[data-r]');if(b){b.dataset.r=='1'?done(o.input?i.value.trim():true):no()}else if(e.target==d)no()};
+  if(i){i.focus();i.onkeydown=e=>{if(e.key=='Enter')d.querySelector('[data-r="1"]').click();if(e.key=='Escape')no()}}
+  else d.querySelector('[data-r="1"]').focus();
+})}
 const cache={},U=x=>cache[x]||x,ghOK=()=>cfg.repo&&cfg.token;
 const ghU=p=>`https://api.github.com/repos/${cfg.repo}/contents/${p}`,ghH=()=>({Authorization:'Bearer '+cfg.token,Accept:'application/vnd.github+json'});
 async function store(d,id){
@@ -497,31 +549,31 @@ async function gc(){
 const I={d:`<svg class="sv" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>`,m:`<svg class="sv" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="3" width="10" height="18" rx="2.5"/><path d="M11 18h2"/></svg>`};
 const devIc=a=>`<span class="dv"><span class="${a.mob!==false?'':'off'}" title="${a.mob!==false?'Móvil':'Móvil: no disponible'}">${I.m}</span><span class="${a.desk!==false?'':'off'}" title="${a.desk!==false?'Ordenador':'Ordenador: no disponible'}">${I.d}</span></span>`;
 const THEMES=[['light','Claro','#ffffff'],['dark','Oscuro','#131314'],['medio','Medio','#3b4260'],['crema','Crema','#fbf3e4'],['loto','Loto','#fdeef6']];
-let admins=[],tab='a';
+let admins=[],tab='a',edSnap=null;
 const MAIN={u:'xavibc',s:'tienda-xavibc',h:'1b6bf2a2c37ed4db7960a8af1c0c1d69b22dc76af4a2549d4b2ba8d81fdaf8c8'};
 const setTheme=t=>{document.body.dataset.theme=t;localStorage.setItem('tienda_theme',t);const m=document.getElementById('tc');if(m)m.content=({light:'#ffffff',dark:'#131314',medio:'#3b4260',crema:'#fbf3e4',loto:'#fdeef6'})[t]||'#ffffff'};
 setTheme(localStorage.getItem('tienda_theme')||'light');
 const hash=async(p,s)=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s+':'+p)))].map(b=>b.toString(16).padStart(2,'0')).join('');
 function pop(id){$('#sb').classList.remove('on');const p=$(id),o=p.classList.contains('on');closePops();if(!o)p.classList.add('on')}
 function closePops(){document.querySelectorAll('.pop').forEach(x=>x.classList.remove('on'))}
-function drawV(){$('#pV').innerHTML=VIEWS.map(([k,l])=>`<button class="mi ${k==view?'on':''}" data-v="${k}">${l}</button>`).join('')}
-function drawT(){$('#pT').innerHTML=THEMES.map(([k,l,c])=>`<button class="mi ${document.body.dataset.theme==k?'on':''}" data-th="${k}"><i class="sw" style="background:${c}"></i>${l}</button>`).join('')}
+function drawG(m){
+  const b='<button class="mi" data-g="b">‹ Ajustes</button>';
+  $('#pG').innerHTML=m=='v'?b+VIEWS.map(([k,l])=>`<button class="mi ${k==view?'on':''}" data-v="${k}">${l}</button>`).join(''):m=='t'?b+THEMES.map(([k,l,c])=>`<button class="mi ${document.body.dataset.theme==k?'on':''}" data-th="${k}"><i class="sw" style="background:${c}"></i>${l}</button>`).join(''):`<button class="mi" data-g="v">Vista</button><button class="mi" data-g="t">Temas</button><button class="mi" data-g="a">Edición</button>${dip?'<button class="mi" data-g="i">Instalar aplicación</button>':''}`}
 document.addEventListener('click',e=>{
   const T=e.target,ins=T.closest('.pop,.ib,.sb');
   if(T.closest('#bS')){const b=$('#sb');b.classList.toggle('on');closePops();if(b.classList.contains('on'))$('#q').focus();else{$('#q').value='';render()}return}
-  if(T.closest('#bV')){drawV();pop('#pV');return}
-  if(T.closest('#bT')){drawT();pop('#pT');return}
-  if(T.closest('#bG')){closePops();$('#sb').classList.remove('on');openAdmin();return}
+  if(T.closest('#bG')){drawG();pop('#pG');return}
   if(!ins){closePops();if($('#sb').classList.contains('on')){$('#sb').classList.remove('on');$('#q').value='';render()}return}
   const m=T.closest('[data-v],[data-th],[data-g]');if(!m)return;
   if(m.dataset.v){view=m.dataset.v;localStorage.setItem('tienda_view',view);closePops();render()}
-  else if(m.dataset.th){setTheme(m.dataset.th);drawT()}
+  else if(m.dataset.th){setTheme(m.dataset.th);drawG('t')}
+  else if(m.dataset.g){const g=m.dataset.g;if(g=='a'){closePops();openAdmin()}else if(g=='i'){closePops();if(dip){dip.prompt();dip.userChoice.then(()=>{dip=null})}}else drawG(g=='b'?undefined:g)}
 });
 const tabsHtml=()=>`<div class="seg">${[['a','Aplicaciones'],['u','Administradores'],['r','Respaldo'],['n','Red']].map(([k,l])=>`<button class="tab ${tab==k?'on':''}" data-tab="${k}">${l}</button>`).join('')}</div>`;
 const admRender=()=>tab=='u'?admUsers():admApps();
 document.addEventListener('click',e=>{const t=e.target.closest('[data-tab]');if(t){tab=t.dataset.tab;ed=null;admRender()}});
 function loginRender(){
-  $('#adm').innerHTML=`<button class="btn x" data-close>✕</button><h2>Acceso de administración</h2>
+  $('#adm').innerHTML=`<button class="btn x" data-close>✕</button><h2>Acceso a edición</h2>
   <div class="f" style="margin-top:14px;max-width:380px">
   <div><label>Usuario</label><input id="lu" autocomplete="username"></div>
   <div><label>Contraseña</label><input id="lp" type="password" autocomplete="current-password"></div>
@@ -534,7 +586,7 @@ function loginRender(){
   $('#lg').onclick=go;$('#adm').onkeydown=e=>{if(e.key=='Enter')go()};
 }
 function admUsers(){
-  $('#adm').innerHTML=`<button class="btn x" data-close>✕</button><h2>Administración</h2>${tabsHtml()}
+  $('#adm').innerHTML=`<button class="btn x" data-close>✕</button><h2>Edición</h2>${tabsHtml()}
   <div class="f" style="margin-top:10px">
   <div class="al"><span><b>${esc(MAIN.u)}</b><br><small>Administrador principal · fijo, no se puede modificar ni eliminar</small></span></div>
   ${admins.map((a,i)=>`<div class="al"><span><b>${esc(a.u)}</b></span><button class="btn d" data-dadm="${i}">Eliminar</button></div>`).join('')}
@@ -547,14 +599,14 @@ function admUsers(){
     if(!u||p.length<6)return $('#nm').textContent='Usuario y contraseña (mínimo 6 caracteres)';
     if(u==MAIN.u||admins.some(a=>a.u==u))return $('#nm').textContent='Ese usuario ya existe';
     const sa=crypto.randomUUID();admins.push({u,s:sa,h:await hash(p,sa)});await seal(u,p);sv();admUsers();toast('Administrador añadido')};
-  $('#adm').querySelectorAll('[data-dadm]').forEach(b=>b.onclick=()=>{if(confirm('¿Eliminar administrador?')){delete vault.tk[admins[b.dataset.dadm].u];admins.splice(b.dataset.dadm,1);sv();admUsers()}});
+  $('#adm').querySelectorAll('[data-dadm]').forEach(b=>b.onclick=async()=>{if(await ask('Perderá el acceso a la edición.',{title:'¿Eliminar administrador?',ok:'Eliminar',danger:true})){delete vault.tk[admins[b.dataset.dadm].u];admins.splice(b.dataset.dadm,1);sv();admUsers()}});
 }
 function openAdmin(){sess.pw?(ed=null,tab='a',admRender()):loginRender();$('#ovA').classList.add('on')}
 let dip=null;
-addEventListener('beforeinstallprompt',e=>{e.preventDefault();dip=e;$('#bI').hidden=false});
-$('#bI').onclick=async()=>{if(!dip)return;dip.prompt();await dip.userChoice;dip=null;$('#bI').hidden=true};
-addEventListener('appinstalled',()=>{$('#bI').hidden=true});
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();dip=e});
+addEventListener('appinstalled',()=>{dip=null});
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+new ResizeObserver(()=>document.documentElement.style.setProperty('--hh',document.querySelector('header').offsetHeight+'px')).observe(document.querySelector('header'));
 async function refresh(){
   if(sess.pw||localStorage.getItem('tienda_draft')||$('#ovA').classList.contains('on'))return;
   try{const r=await fetch(cfg.path+'?t='+Date.now(),{cache:'no-store'});const t=await r.text(),g=sigOf(t);if(g==baseSig)return;
