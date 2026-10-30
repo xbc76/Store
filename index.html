@@ -302,6 +302,16 @@ input:focus,textarea:focus,select:focus{outline:2px solid color-mix(in srgb,var(
 .dact{display:flex;gap:10px;justify-content:flex-end}
 .dact .btn{min-height:46px;padding:10px 22px;border-radius:14px;font-weight:700}
 @media(max-width:700px){.dact .btn{flex:1}}
+
+/* ===== Visor de aplicaciones a pantalla completa ===== */
+.vw{position:fixed;inset:0;z-index:100;background:#000;display:none}
+.vw.on{display:block}
+.vw iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#fff}
+.vq{position:absolute;width:44px;height:44px;border-radius:50%;border:0;padding:0;background:rgba(20,20,30,.5);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:grid;place-items:center;touch-action:none;z-index:2;opacity:.65;box-shadow:0 4px 14px #0006;cursor:grab}
+.vq:hover,.vq:active{opacity:1}.vq img{pointer-events:none}
+.vm{position:absolute;z-index:3;background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:18px;padding:6px;width:220px;display:none;box-shadow:0 20px 50px -10px #0008}
+.vm.on{display:block}
+.v-big .ban{height:auto;aspect-ratio:16/9}
 </style>
 </head>
 <body data-theme="light">
@@ -319,6 +329,9 @@ input:focus,textarea:focus,select:focus{outline:2px solid color-mix(in srgb,var(
 
 <div class="ov" id="ovD"><div class="mod" id="det"></div></div>
 <div class="ov" id="ovA"><div class="mod" id="adm"></div></div>
+<div class="vw" id="vw"><iframe id="vf" title="Aplicación" allow="autoplay; fullscreen; microphone; camera; geolocation; clipboard-read; clipboard-write; picture-in-picture; screen-wake-lock; web-share"></iframe>
+  <button class="vq" id="vq" aria-label="Menú de la aplicación"><img src="icon-192.png" alt="" width="30" height="30"></button>
+  <div class="vm" id="vm"><button class="mi" data-x="x">Volver a la tienda</button><button class="mi" data-x="r">Recargar</button><button class="mi" data-x="b">Abrir en el navegador</button></div></div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -364,7 +377,7 @@ function openDet(id){
     const imgs=(dev=='d'?a.imgD:a.imgM)||[];
     $('#det').innerHTML=`<button class="btn x" data-close>✕</button>
     <div class="hd">${iconHtml(a)}<div><h2>${esc(a.name)}</h2>${a.cat?`<div class="tag" style="font-size:15px">${esc(a.cat)}</div>`:''}<div class="sub">${devIc(a)}</div></div></div>
-    ${a.url&&a.url!='#'?`<a class="btn p go" href="${esc(a.url)}" target="_blank" rel="noopener">▶ Abrir aplicación</a>`:''}
+    ${a.url&&a.url!='#'?`<a class="btn p go" data-open href="${esc(a.url)}" target="_blank" rel="noopener">▶ Abrir aplicación</a>`:''}
     ${hd&&hm?'<div class="seg">':'<div hidden>'}${a.mob!==false?`<button class="tab ${dev=='m'?'on':''}" data-dev="m" title="Móvil" aria-label="Móvil">${I.m}</button>`:''}${a.desk!==false?`<button class="tab ${dev=='d'?'on':''}" data-dev="d" title="Ordenador" aria-label="Ordenador">${I.d}</button>`:''}</div>
     <div class="gal ${dev}">${imgs.length?imgs.map(i=>`<img src="${U(i)}" loading="lazy">`).join(''):'<div class="empty">Sin imágenes para esta versión</div>'}</div>
     <h3 style="margin-top:18px;font-weight:500">Acerca de esta app →</h3><p style="margin-top:6px">${esc(a.desc)}</p><div class="txt rt">${textHtml(a.text)}</div>`;
@@ -602,6 +615,28 @@ function admUsers(){
   $('#adm').querySelectorAll('[data-dadm]').forEach(b=>b.onclick=async()=>{if(await ask('Perderá el acceso a la edición.',{title:'¿Eliminar administrador?',ok:'Eliminar',danger:true})){delete vault.tk[admins[b.dataset.dadm].u];admins.splice(b.dataset.dadm,1);sv();admUsers()}});
 }
 function openAdmin(){sess.pw?(ed=null,tab='a',admRender()):loginRender();$('#ovA').classList.add('on')}
+let vOpen=false,vUrl='';
+function openApp(url){
+  vUrl=url;vOpen=true;$('#vf').src=url;$('#vw').classList.add('on');
+  history.pushState({vw:1},'');
+  const w=$('#vw');if(w.requestFullscreen)w.requestFullscreen({navigationUI:'hide'}).catch(()=>{});
+}
+function closeApp(fromPop){
+  if(!vOpen)return;vOpen=false;
+  $('#vw').classList.remove('on');$('#vm').classList.remove('on');$('#vf').src='about:blank';
+  if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});
+  if(!fromPop&&history.state&&history.state.vw)history.back();
+}
+addEventListener('popstate',()=>{if(vOpen)closeApp(true)});
+document.addEventListener('click',e=>{const o=e.target.closest('[data-open]');if(o){e.preventDefault();openApp(o.href);return}
+  const x=e.target.closest('[data-x]');if(x){const k=x.dataset.x;$('#vm').classList.remove('on');
+    if(k=='x')closeApp();else if(k=='r')$('#vf').src=vUrl;else window.open(vUrl,'_blank','noopener')}});
+{const q=$('#vq'),m=$('#vm');let dr=null;
+ q.style.left='8px';q.style.top='45%';
+ q.onpointerdown=e=>{dr={x:e.clientX,y:e.clientY,l:q.offsetLeft,t:q.offsetTop,m:false};q.setPointerCapture(e.pointerId)};
+ q.onpointermove=e=>{if(!dr)return;const dx=e.clientX-dr.x,dy=e.clientY-dr.y;if(Math.abs(dx)+Math.abs(dy)>6)dr.m=true;
+   if(dr.m){q.style.left=Math.max(0,Math.min(innerWidth-44,dr.l+dx))+'px';q.style.top=Math.max(0,Math.min(innerHeight-44,dr.t+dy))+'px';m.classList.remove('on')}};
+ q.onpointerup=()=>{if(dr&&!dr.m){const on=m.classList.toggle('on');if(on){m.style.left=Math.max(8,Math.min(q.offsetLeft,innerWidth-228))+'px';m.style.top=(q.offsetTop+52+170>innerHeight?q.offsetTop-176:q.offsetTop+52)+'px'}}dr=null}}
 let dip=null;
 addEventListener('beforeinstallprompt',e=>{e.preventDefault();dip=e});
 addEventListener('appinstalled',()=>{dip=null});
