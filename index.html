@@ -312,6 +312,15 @@ input:focus,textarea:focus,select:focus{outline:2px solid color-mix(in srgb,var(
 .vm{position:absolute;z-index:3;background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:18px;padding:6px;width:220px;display:none;box-shadow:0 20px 50px -10px #0008}
 .vm.on{display:block}
 .v-big .ban{height:auto;aspect-ratio:16/9}
+
+/* ===== Visibilidad y avisos de formato ===== */
+.vis{position:relative;width:46px;height:26px;flex:none;cursor:pointer;display:block}
+.vis input{position:absolute;inset:0;opacity:0;width:100%;height:100%;margin:0;padding:0;cursor:pointer;z-index:1}
+.vis i{position:absolute;inset:0;border-radius:99px;background:var(--bd);transition:.2s}
+.vis i::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 3px #0005}
+.vis input:checked+i{background:#22c55e}.vis input:checked+i::after{left:23px}
+.al.off{opacity:.6}
+.hint{display:block;color:var(--mut);font-size:12px;margin:-1px 0 7px}.hint b{color:var(--a1)}
 </style>
 </head>
 <body data-theme="light">
@@ -356,11 +365,11 @@ const draft=()=>{localStorage.setItem('tienda_draft',JSON.stringify(apps));local
 
 function iconHtml(a){const i=a.icon||'';return /^(data:|https?:|img\/)/.test(i)?`<div class="ic${/\.(png|webp)$|^data:image\/(png|webp)/.test(i)?' tr':''}"><img src="${esc(U(i))}"></div>`:`<div class="ic" style="background:linear-gradient(135deg,${GRADS[(a.color||0)%GRADS.length]});color:#fff">${esc(i||(a.name||'?')[0].toUpperCase())}</div>`}
 function render(){
-    const cats=['Todas',...new Set(apps.map(a=>a.cat).filter(Boolean))];
+    const cats=['Todas',...new Set(apps.filter(a=>!a.hidden).map(a=>a.cat).filter(Boolean))];
   if(!cats.includes(cat))cat='Todas';
   $('#chips').innerHTML=cats.length<2?'':cats.map(c=>`<button class="chip ${c==cat?'on':''}" data-c="${esc(c)}">${esc(c)}</button>`).join('');
   const q=$('#q').value.toLowerCase();
-  const l=apps.filter(a=>(cat=='Todas'||a.cat==cat)&&(a.name+a.desc+a.cat).toLowerCase().includes(q));
+  const l=apps.filter(a=>!a.hidden&&(cat=='Todas'||a.cat==cat)&&(a.name+a.desc+a.cat).toLowerCase().includes(q));
   const g=$('#grid');g.className='v-'+view;
   g.innerHTML=l.length?l.map((a,n)=>{
     const cover=(a.imgD&&a.imgD[0])||(a.imgM&&a.imgM[0]);const bg=cover?`url(${U(cover)}) center/cover`:`linear-gradient(135deg,${GRADS[(a.color||0)%GRADS.length]})`;return `<article class="card" data-id="${esc(a.id)}" style="animation-delay:${Math.min(n,14)*35}ms"><div class="ban" style="background:${bg}"></div><div class="meta">${iconHtml(a)}<div class="inf"><h3>${esc(a.name)}</h3><div class="sub">${a.cat?`<span class="tag">${esc(a.cat)}</span>`:''} ${devIc(a)}</div><p>${esc(a.desc)}</p></div></div></article>`}).join(''):'<div class="empty">No hay aplicaciones todavía </div>';
@@ -413,26 +422,26 @@ function admApps(){
    <div class="g2"><div><label>Nombre</label><input id="fn" value="${esc(e.name)}"></div><div><label>Categoría</label><input id="fc" value="${esc(e.cat)}"></div></div>
    <div><label>URL de la app (GitHub Pages)</label><input id="fu" value="${esc(e.url)}" placeholder="https://usuario.github.io/app/"></div>
    <div class="row"><div id="ipv">${iconHtml(e)}</div><small style="color:var(--mut)">${e.icon?'Icono actual':'Sin icono (se mostrará la inicial)'}</small>${e.icon?'<button type="button" class="btn" id="irm">Quitar icono</button>':''}</div>
-    <div class="g2"><div><label>Icono (emoji o URL)</label><input id="fi" value="${/^(data:|img\/)/.test(e.icon)?'':esc(e.icon)}" placeholder="🎮"></div><div><label>…o subir imagen de icono</label><input type="file" id="fif" accept="image/*"></div></div>
+    <div class="g2"><div><label>Icono (emoji o URL)</label><input id="fi" value="${/^(data:|img\/)/.test(e.icon)?'':esc(e.icon)}" placeholder="🎮"></div><div><label>…o subir imagen de icono</label><small class="hint">Formato recomendado <b>1:1</b></small><input type="file" id="fif" accept="image/*"></div></div>
    <div><label>Descripción corta</label><input id="fd" value="${esc(e.desc)}"></div>
    <div><label>Texto completo</label><div class="rte">${rteBar()}<div class="edt rt" id="ft" contenteditable="true">${textHtml(e.text)}</div></div></div>
    <div><label>Color de portada</label><select id="fcol">${GRADS.map((g,i)=>`<option value="${i}" ${e.color==i?'selected':''}>Degradado ${i+1}</option>`).join('')}</select></div>
-   <div class="row"><label><input type="checkbox" id="fmb" ${e.mob!==false?'checked':''} style="width:auto"> ${I.m} Versión móvil</label><label><input type="checkbox" id="fdk" ${e.desk!==false?'checked':''} style="width:auto"> ${I.d} Versión ordenador</label></div>
-   <div><label>${I.m} Imágenes móvil</label><input type="file" id="fim" accept="image/*" multiple><div class="th" style="margin-top:6px">${thumbs('imgM')}</div></div>
-   <div><label>${I.d} Imágenes ordenador</label><input type="file" id="fid" accept="image/*" multiple><div class="th" style="margin-top:6px">${thumbs('imgD')}</div></div>
+   <div class="row"><label><input type="checkbox" id="fmb" ${e.mob!==false?'checked':''} style="width:auto"> ${I.m} Versión móvil</label><label><input type="checkbox" id="fvis" ${e.hidden?'':'checked'} style="width:auto"> Visible en la tienda</label><label><input type="checkbox" id="fdk" ${e.desk!==false?'checked':''} style="width:auto"> ${I.d} Versión ordenador</label></div>
+   <div><label>${I.m} Imágenes móvil</label><small class="hint">Formato recomendado <b>9:20</b></small><input type="file" id="fim" accept="image/*" multiple><div class="th" style="margin-top:6px">${thumbs('imgM')}</div></div>
+   <div><label>${I.d} Imágenes ordenador</label><small class="hint">Formato recomendado <b>16:9</b></small><input type="file" id="fid" accept="image/*" multiple><div class="th" style="margin-top:6px">${thumbs('imgD')}</div></div>
    <div class="row"><button class="btn p" id="sv">Guardar ficha</button><button class="btn" id="cn">Cancelar</button></div></div>`:`
   <div class="row" style="margin-top:12px"><button class="btn p" id="nw">Nueva aplicación</button><button class="btn ok" id="pub">Publicar en GitHub</button><button class="btn" id="lo">Salir</button></div>
-  <div style="margin:10px 0">${apps.map((a,i)=>`<div class="al">${iconHtml(a)}<span><b>${esc(a.name)}</b><br><small>${esc(a.cat)}</small></span><div class="acts"><button class="btn" data-up="${i}">↑</button><button class="btn ed" data-ed="${i}">Editar</button><button class="btn d" data-del="${i}">Borrar</button></div></div>`).join('')}</div>`);
+  <div style="margin:10px 0">${apps.map((a,i)=>`<div class="al${a.hidden?' off':''}">${iconHtml(a)}<span><b>${esc(a.name)}</b><br><small>${a.hidden?'Oculta · ':''}${esc(a.cat)}</small></span><label class="vis" title="Visible en la tienda"><input type="checkbox" data-vis="${i}" ${a.hidden?'':'checked'}><i></i></label><div class="acts"><button class="btn" data-up="${i}">↑</button><button class="btn ed" data-ed="${i}">Editar</button><button class="btn d" data-del="${i}">Borrar</button></div></div>`).join('')}</div>`);
   const A=$('#adm'),on=(s,f)=>{const x=A.querySelector(s);if(x)x.onclick=f};
   on('#nw',()=>{edSnap=null;ed={id:'a'+Date.now(),name:'',cat:'',url:'',icon:'',desc:'',text:'',color:0,desk:true,mob:true,imgD:[],imgM:[]};admRender()});
   on('#cn',async()=>{keep();if(JSON.stringify(ed)!=edSnap&&!await ask('Si sales ahora, se perderán los cambios que no hayas guardado.',{title:'¿Descartar los cambios?',ok:'Descartar',cancel:'Seguir editando',danger:true}))return;ed=null;edSnap=null;admRender()});
   on('#sv',()=>{if(!$('#fn').value.trim())return toast('Falta el nombre');
-    Object.assign(ed,{name:$('#fn').value.trim(),cat:$('#fc').value.trim(),url:$('#fu').value.trim(),desc:$('#fd').value,text:clean($('#ft').innerHTML),color:+$('#fcol').value,desk:$('#fdk').checked,mob:$('#fmb').checked});
+    Object.assign(ed,{name:$('#fn').value.trim(),cat:$('#fc').value.trim(),url:$('#fu').value.trim(),desc:$('#fd').value,text:clean($('#ft').innerHTML),color:+$('#fcol').value,desk:$('#fdk').checked,mob:$('#fmb').checked,hidden:!$('#fvis').checked});
     if($('#fi').value.trim())ed.icon=$('#fi').value.trim();
     const i=apps.findIndex(a=>a.id==ed.id);i<0?apps.push(ed):apps[i]=ed;
     apps=apps.filter(a=>a.id!='demo'||apps.length==1);draft();ed=null;admRender();render();toast('Guardado (pendiente de publicar)')});
   const up=(s,k,max)=>{const x=A.querySelector(s);if(x)x.onchange=async()=>{for(const f of x.files){toast('Subiendo imagen…');ed[k].push(await store(await compress(f,max),ed.id))};keep();admRender()}};
-  const keep=()=>{Object.assign(ed,{name:$('#fn').value,cat:$('#fc').value,url:$('#fu').value,desc:$('#fd').value,text:clean($('#ft').innerHTML),color:+$('#fcol').value,desk:$('#fdk').checked,mob:$('#fmb').checked});if($('#fi').value.trim())ed.icon=$('#fi').value.trim()};
+  const keep=()=>{Object.assign(ed,{name:$('#fn').value,cat:$('#fc').value,url:$('#fu').value,desc:$('#fd').value,text:clean($('#ft').innerHTML),color:+$('#fcol').value,desk:$('#fdk').checked,mob:$('#fmb').checked,hidden:!$('#fvis').checked});if($('#fi').value.trim())ed.icon=$('#fi').value.trim()};
   up('#fid','imgD',1000);up('#fim','imgM',600);
   const fi=A.querySelector('#fif');if(fi)fi.onchange=async()=>{keep();ed.icon=await store(await compress(fi.files[0],128,true),ed.id);admRender();toast('Icono subido')};
   const fie=$('#fi');if(fie)fie.oninput=()=>{ed.icon=fie.value.trim();$('#ipv').innerHTML=iconHtml({...ed,name:$('#fn').value})};
@@ -449,6 +458,7 @@ function admApps(){
   }
   A.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{keep();const[k,i]=b.dataset.rm.split(':');ed[k].splice(i,1);admRender()});
   A.querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>{edSnap=null;ed=JSON.parse(JSON.stringify(apps[b.dataset.ed]));ed.imgD=ed.imgD||[];ed.imgM=ed.imgM||[];admRender()});
+  A.querySelectorAll('[data-vis]').forEach(c=>c.onchange=()=>{apps[c.dataset.vis].hidden=!c.checked;draft();admRender();render();toast(c.checked?'Visible en la tienda':'Oculta en la tienda')});
   A.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{if(await ask('Se eliminará «'+apps[b.dataset.del].name+'». Sus imágenes se borrarán de GitHub al publicar.',{title:'¿Eliminar aplicación?',ok:'Eliminar',danger:true})){apps.splice(b.dataset.del,1);draft();admRender();render()}});
   A.querySelectorAll('[data-up]').forEach(b=>b.onclick=()=>{const i=+b.dataset.up;if(i>0){[apps[i-1],apps[i]]=[apps[i],apps[i-1]];draft();admRender();render()}});
   if(e&&tab=='a'&&!edSnap){keep();edSnap=JSON.stringify(ed)}
