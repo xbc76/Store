@@ -321,6 +321,26 @@ input:focus,textarea:focus,select:focus{outline:2px solid color-mix(in srgb,var(
 .vis input:checked+i{background:#22c55e}.vis input:checked+i::after{left:23px}
 .al.off{opacity:.6}
 .hint{display:block;color:var(--mut);font-size:12px;margin:-1px 0 7px}.hint b{color:var(--a1)}
+
+/* ===== Menú de ajustes e información ===== */
+.sl{color:var(--c);font-weight:800}
+.mi.sub::after{content:'›';float:right;opacity:.5;font-size:18px;line-height:1}
+.ir{display:flex;justify-content:space-between;align-items:center;gap:24px;padding:11px 14px;border-radius:10px;user-select:none;-webkit-user-select:none}
+.ir span:first-child{color:var(--mut)}.ir b{font-weight:700;white-space:nowrap}
+#pG{min-width:250px}
+
+/* ===== Botones de vistas y temas ===== */
+#pG{min-width:290px}
+.og{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:6px 4px 4px}
+.og>:last-child:nth-child(odd){grid-column:1/-1}
+.ob{border:2px solid var(--bd);border-radius:16px;padding:10px 6px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;cursor:pointer;background:var(--card);color:var(--tx);font-weight:600;font-size:12.5px;text-align:center;line-height:1.2;transition:.2s}
+.ob:hover{transform:translateY(-2px)}
+.ob.on{border-color:var(--a1);box-shadow:0 0 0 3px color-mix(in srgb,var(--a1) 25%,transparent)}
+.vt{color:var(--a1)}.vt .a{fill:currentColor;opacity:.22}.vt .b{fill:currentColor;opacity:.85}
+.ob.th{min-height:70px;border-color:rgba(128,128,128,.35)}
+.ob.th.on{border-color:var(--tc);box-shadow:0 0 0 3px color-mix(in srgb,var(--tc) 35%,transparent)}
+.pv{display:flex}.pv i{width:20px;height:20px;border-radius:50%;border:2px solid rgba(128,128,128,.4);margin-left:-5px}.pv i:first-child{margin-left:0}
+[data-theme=oceano]{--bg:#4b7f9c;--card:#5a8fae;--tx:#ffffff;--mut:#e3f0f7;--bd:#78a8c4;--sf:#689cba;--a1:#ffd166;--a2:#ff8fab;--a3:#9ff0dc;--onp:#3b2a00;--sh:0 1px 4px #0003}
 </style>
 </head>
 <body data-theme="light">
@@ -571,17 +591,32 @@ async function gc(){
 }
 const I={d:`<svg class="sv" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>`,m:`<svg class="sv" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="3" width="10" height="18" rx="2.5"/><path d="M11 18h2"/></svg>`};
 const devIc=a=>`<span class="dv"><span class="${a.mob!==false?'':'off'}" title="${a.mob!==false?'Móvil':'Móvil: no disponible'}">${I.m}</span><span class="${a.desk!==false?'':'off'}" title="${a.desk!==false?'Ordenador':'Ordenador: no disponible'}">${I.d}</span></span>`;
-const THEMES=[['light','Claro','#ffffff'],['dark','Oscuro','#131314'],['medio','Medio','#3b4260'],['crema','Crema','#fbf3e4'],['loto','Loto','#fdeef6']];
+const APP_VERSION='1.0.0',APP_DATE='12/11/2026';
+const STUDIO=['#ef4444','#f97316','#eab308','#22c55e','#06b6d4','#a855f7'].map((c,i)=>`<span class="sl" style="--c:${c}">${'Studio'[i]}</span>`).join('');
+let showDate=false,taps=0;
+const THEME_ST={light:{bg:'#ffffff',card:'#f1f3f4',tx:'#1f1f1f',a1:'#01875f',a2:'#4285f4'},dark:{bg:'#131314',card:'#2a2b2d',tx:'#e3e3e3',a1:'#3ddc97',a2:'#8ab4f8'},medio:{bg:'#3b4260',card:'#4f5880',tx:'#f2f4ff',a1:'#ffb454',a2:'#7fc8ff'},crema:{bg:'#fbf3e4',card:'#f3e6cc',tx:'#4a3426',a1:'#c2410c',a2:'#d4a017'},loto:{bg:'#fdeef6',card:'#fadcec',tx:'#4a1d4e',a1:'#c026d3',a2:'#ff7eb6'},oceano:{bg:'#4b7f9c',card:'#689cba',tx:'#ffffff',a1:'#ffd166',a2:'#ff8fab'}};
+const R=(x,y,w,h,c,r=3)=>`<rect class="${c}" x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}"/>`;
+const VIEW_IMG={
+ big:R(4,4,25,36,'a',4)+R(35,4,25,36,'a',4)+R(7,7,19,14,'b')+R(38,7,19,14,'b')+R(7,25,12,3,'b',1.5)+R(38,25,12,3,'b',1.5),
+ small:[4,24,44].map(x=>R(x,4,16,16,'b',4)+R(x,24,16,16,'b',4)).join(''),
+ list:[5,18,31].map(y=>R(4,y,10,10,'b')+R(18,y+1,30,3,'b',1.5)+R(18,y+6,40,3,'a',1.5)).join(''),
+ compact:[4,12,20,28,36].map(y=>R(4,y,6,6,'b',2)+R(14,y+1.5,46,3,'a',1.5)).join(''),
+ icons:[6,20,34,48].map(x=>R(x,8,10,10,'b')+R(x,26,10,10,'b')).join(''),
+ mosaic:R(4,4,26,36,'b',4)+R(34,4,26,17,'a',4)+R(34,23,26,17,'b',4)
+};
+const VSHORT={big:'Cuadrícula grande',small:'Cuadrícula pequeña',list:'Lista',compact:'Compacta',icons:'Iconos',mosaic:'Mosaico'};
+const THEMES=[['light','Claro','#ffffff'],['dark','Oscuro','#131314'],['medio','Medio','#3b4260'],['crema','Crema','#fbf3e4'],['loto','Loto','#fdeef6'],['oceano','Océano','#4b7f9c']];
 let admins=[],tab='a',edSnap=null;
 const MAIN={u:'xavibc',s:'tienda-xavibc',h:'1b6bf2a2c37ed4db7960a8af1c0c1d69b22dc76af4a2549d4b2ba8d81fdaf8c8'};
-const setTheme=t=>{document.body.dataset.theme=t;localStorage.setItem('tienda_theme',t);const m=document.getElementById('tc');if(m)m.content=({light:'#ffffff',dark:'#131314',medio:'#3b4260',crema:'#fbf3e4',loto:'#fdeef6'})[t]||'#ffffff'};
+const setTheme=t=>{document.body.dataset.theme=t;localStorage.setItem('tienda_theme',t);const m=document.getElementById('tc');if(m)m.content=({light:'#ffffff',dark:'#131314',medio:'#3b4260',crema:'#fbf3e4',loto:'#fdeef6',oceano:'#4b7f9c'})[t]||'#ffffff'};
 setTheme(localStorage.getItem('tienda_theme')||'light');
 const hash=async(p,s)=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s+':'+p)))].map(b=>b.toString(16).padStart(2,'0')).join('');
 function pop(id){$('#sb').classList.remove('on');const p=$(id),o=p.classList.contains('on');closePops();if(!o)p.classList.add('on')}
-function closePops(){document.querySelectorAll('.pop').forEach(x=>x.classList.remove('on'))}
+function closePops(){showDate=false;taps=0;document.querySelectorAll('.pop').forEach(x=>x.classList.remove('on'))}
 function drawG(m){
   const b='<button class="mi" data-g="b">‹ Ajustes</button>';
-  $('#pG').innerHTML=m=='v'?b+VIEWS.map(([k,l])=>`<button class="mi ${k==view?'on':''}" data-v="${k}">${l}</button>`).join(''):m=='t'?b+THEMES.map(([k,l,c])=>`<button class="mi ${document.body.dataset.theme==k?'on':''}" data-th="${k}"><i class="sw" style="background:${c}"></i>${l}</button>`).join(''):`<button class="mi" data-g="v">Vista</button><button class="mi" data-g="t">Temas</button><button class="mi" data-g="a">Edición</button>${dip?'<button class="mi" data-g="i">Instalar aplicación</button>':''}`}
+  if(m!='n'){showDate=false;taps=0}
+  $('#pG').innerHTML=m=='v'?b+'<div class="og">'+VIEWS.map(([k])=>`<button class="ob ${k==view?'on':''}" data-v="${k}"><svg class="vt" viewBox="0 0 64 44" width="72" height="50">${VIEW_IMG[k]}</svg><span>${VSHORT[k]}</span></button>`).join('')+'</div>':m=='t'?b+'<div class="og">'+THEMES.map(([k,l])=>{const t=THEME_ST[k];return `<button class="ob th ${document.body.dataset.theme==k?'on':''}" data-th="${k}" style="background:${t.bg};color:${t.tx};--tc:${t.a1}"><span class="pv"><i style="background:${t.a1}"></i><i style="background:${t.a2}"></i><i style="background:${t.card}"></i></span><span>${l}</span></button>`}).join('')+'</div>':m=='n'?b+`<div class="ir"><span>Aplicación</span><b>Store ${STUDIO}</b></div><div class="ir"><span>Desarrollador</span><b>Xavibc</b></div><div class="ir" data-g="ver"><span>Versión</span><b>${APP_VERSION}</b></div>${showDate?`<div class="ir"><span>Fecha</span><b>${APP_DATE}</b></div>`:''}`:`<button class="mi sub" data-g="v">Vista</button><button class="mi sub" data-g="t">Temas</button><button class="mi" data-g="a">Edición</button><button class="mi sub" data-g="n">Información</button>${dip?'<button class="mi" data-g="i">Instalar aplicación</button>':''}`}
 document.addEventListener('click',e=>{
   const T=e.target,ins=T.closest('.pop,.ib,.sb');
   if(T.closest('#bS')){const b=$('#sb');b.classList.toggle('on');closePops();if(b.classList.contains('on'))$('#q').focus();else{$('#q').value='';render()}return}
@@ -590,7 +625,7 @@ document.addEventListener('click',e=>{
   const m=T.closest('[data-v],[data-th],[data-g]');if(!m)return;
   if(m.dataset.v){view=m.dataset.v;localStorage.setItem('tienda_view',view);closePops();render()}
   else if(m.dataset.th){setTheme(m.dataset.th);drawG('t')}
-  else if(m.dataset.g){const g=m.dataset.g;if(g=='a'){closePops();openAdmin()}else if(g=='i'){closePops();if(dip){dip.prompt();dip.userChoice.then(()=>{dip=null})}}else drawG(g=='b'?undefined:g)}
+  else if(m.dataset.g){const g=m.dataset.g;if(g=='a'){closePops();openAdmin()}else if(g=='i'){closePops();if(dip){dip.prompt();dip.userChoice.then(()=>{dip=null})}}else if(g=='ver'){taps++;if(taps>=3)showDate=true;drawG('n')}else drawG(g=='b'?undefined:g)}
 });
 const tabsHtml=()=>`<div class="seg">${[['a','Aplicaciones'],['u','Administradores'],['r','Respaldo'],['n','Red']].map(([k,l])=>`<button class="tab ${tab==k?'on':''}" data-tab="${k}">${l}</button>`).join('')}</div>`;
 const admRender=()=>tab=='u'?admUsers():admApps();
